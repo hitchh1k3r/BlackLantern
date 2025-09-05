@@ -1,0 +1,46 @@
+{
+  "build_systems":
+  [
+    {
+      "name": "Build - Debug",
+      "quiet": true,
+      "working_dir": "$project_path/",
+      "file_regex": "^\\s*(.+)\\(([0-9]+):([0-9]+)\\)\\s(.+)$",
+      "cmd": [ "odin", "run", "build", "--", "DEBUG" ],
+    },
+    {
+      "name": "Build - Release",
+      "quiet": true,
+      "working_dir": "$project_path/",
+      "file_regex": "^\\s*(.+)\\(([0-9]+):([0-9]+)\\)\\s(.+)$",
+      "cmd": [ "odin", "run", "build" ],
+    },
+  ],
+  "folders":
+  [
+    {
+      "name": "Odin Base",
+      "path": "../Odin/base",
+    },
+    {
+      "name": "Odin Core",
+      "path": "../Odin/core",
+    },
+    {
+      "name": "Odin Vendor",
+      "path": "../Odin/vendor",
+    },
+    {
+      "name": "Odin Shared",
+      "path": "../Odin/shared",
+    },
+    {
+      "name": "// Project ///////////",
+      "path": "./",
+    },
+  ],
+  "settings":
+  {
+    "atomic_save": true,
+  },
+}

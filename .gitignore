@@ -1,0 +1,27 @@
+# Generated Files
+*_.odin
+
+# Artifacts
+/artifacts/*
+*.bin
+*.exe
+*.jar
+*.exp
+*.sln
+*.obj
+*.pdb
+*.spall
+
+# Visual Studio
+.vs/
+.vscode/
+
+# The RAD Debugger
+*.raddbgi
+*.rdi
+
+# Sublime Text
+*.sublime-workspace
+
+# Blender Backup Files
+*.blend[0-9]
