@@ -14,8 +14,12 @@ import "shared"
   MEM2_FLASH   :: 7
   MEM2_DARK    :: 8
   MEM2_LISTEN  :: 9
+  MEM3_STIR    :: 10
+  MEM3_VOICE   :: 11
+  MEM3_SIREN   :: 12
+  MEM3_ACHE    :: 13
 
-  NODE_COUNT   :: 10
+  NODE_COUNT   :: 14
   node_mem : [NODE_COUNT]Node
 
   init_nodes :: proc "contextless" () {
@@ -116,6 +120,44 @@ import "shared"
           size = 0.400000,
           actions = action_mem[MEM2_LISTEN_REMEMBER:MEM2_LISTEN_REMEMBER+1],
         },
+      // Memory 3
+        {
+          name = "Stir",
+          center = true,
+          pos = { 0, 0.3, -1 },
+          right = { 1.000000, 0.000000, 0.000000 },
+          up = { 0.000000, 1.000000, 0.000000 },
+          size = 0.400000,
+          actions = action_mem[MEM3_STIR_REMEMBER:MEM3_STIR_REMEMBER+1],
+        },
+        {
+          name = "Voice",
+          center = true,
+          pos = { 1, 0.3, 0 },
+          right = { 0.000000, 0.000000, 1.000000 },
+          up = { 0.000000, 1.000000, 0.000000 },
+          size = 0.400000,
+          actions = action_mem[MEM3_VOICE_REMEMBER:MEM3_VOICE_REMEMBER+1],
+        },
+        {
+          name = "Siren",
+          center = true,
+          pos = { 0, 0.2, 1 },
+          right = { -1.000000, 0.000000, 0.000000 },
+          up = { 0.000000, 1.000000, 0.000000 },
+          size = 0.400000,
+          actions = action_mem[MEM3_SIREN_REMEMBER:MEM3_SIREN_REMEMBER+1],
+        },
+        {
+          name = "Ache",
+          center = true,
+          sense_left_until_revealed = 3,
+          pos = { -1, 0.2, 0 },
+          right = { 0.000000, 0.000000, -1.000000 },
+          up = { 0.000000, 1.000000, 0.000000 },
+          size = 0.400000,
+          actions = action_mem[MEM3_ACHE_REMEMBER:MEM3_ACHE_REMEMBER+1],
+        },
     }
   }
 
@@ -134,8 +176,12 @@ import "shared"
   MEM2_FLASH_REMEMBER  :: 10
   MEM2_DARK_REMEMBER   :: 11
   MEM2_LISTEN_REMEMBER :: 12
+  MEM3_STIR_REMEMBER   :: 13
+  MEM3_VOICE_REMEMBER  :: 14
+  MEM3_SIREN_REMEMBER  :: 15
+  MEM3_ACHE_REMEMBER   :: 16
 
-  ACTION_COUNT         :: 13
+  ACTION_COUNT         :: 17
   action_mem : [ACTION_COUNT]Action
 
   init_actions :: proc "contextless" () {
@@ -255,6 +301,46 @@ import "shared"
           on_used = proc "contextless" () {
             caption("Without vision: sound is your guide.\n"+
                     "Ears are now your eyes.")
+            load_location(.Day3_Memory)
+          },
+        },
+      // Memory 3
+        {
+          name = "Remember",
+          on_used = proc "contextless" () {
+            node_mem[MEM3_ACHE].sense_left_until_revealed -= 1
+            node_mem[MEM3_STIR].name = "The spoon circles in the pot. The air\n"+
+                                       "fills with scents of comfort and love."
+            node_mem[MEM3_STIR].size = 0.1
+          },
+        },
+        {
+          name = "Remember",
+          on_used = proc "contextless" () {
+            node_mem[MEM3_ACHE].sense_left_until_revealed -= 1
+            node_mem[MEM3_VOICE].name = "The mother hums,\n"+
+                                        "her tune wraps around the kitchen."
+            node_mem[MEM3_VOICE].size = 0.1
+          },
+        },
+        {
+          name = "Remember",
+          on_used = proc "contextless" () {
+            node_mem[MEM3_ACHE].sense_left_until_revealed -= 1
+            node_mem[MEM3_SIREN].name = "The song ends in a sudden wail.\n"+
+                                        "Not a song nor wind, but a warning.\n"+
+                                        "They drop everything and run."
+            node_mem[MEM3_SIREN].size = 0.1
+            play_sound({ 0.0, 6.708, 13.125, 18.933 }, { 402, 430, 430, 402, 402, 818, 818, 402, 402, 1248, 1248, 402, 402, 1687, 1687, 402, 402, 2099, 2099, 402, 402, 2455, 2455, 402 }, { 0.001, 0.1, 0.1, 0.001, 0.001, 0.2, 0.2, 0.001, 0.001, 0.05, 0.05, 0.001, 0.001, 0.065, 0.065, 0.001, 0.001, 0.04, 0.04, 0.001, 0.001, 0.02, 0.02, 0.001 })
+          },
+        },
+        {
+          needs_reveal = true,
+          name = "Remember",
+          on_used = proc "contextless" () {
+            caption("White fire swallows the sky, your chest\n"+
+                    "tightens, steps grow heavier.\n"+
+                    "Your body gives less with each dawn.")
             load_location(.ChildsRoom_Floor)
           },
         },
@@ -267,6 +353,7 @@ import "shared"
     ChildsRoom_Floor,
     Day1_Memory,
     Day2_Memory,
+    Day3_Memory,
   }
 
   load_location :: proc "contextless" (location : Location) {
@@ -302,5 +389,15 @@ import "shared"
         shared.mem.lights[2].spread = 0.5
         shared.mem.lights[2].brightness = 0.5
         nodes = node_mem[MEM2_LAMP:MEM2_LISTEN+1]
+      case .Day3_Memory:
+        shared.mem.lights[0].dir = { 0, 1, 0 }
+        shared.mem.lights[0].color = 0.75*{ 1, 1, 1 }
+        shared.mem.lights[0].spread = 0.5
+        shared.mem.lights[0].brightness = 0.9
+        shared.mem.lights[1].dir = { 0, -1, 0 }
+        shared.mem.lights[1].color = 0.75*{ 1, 1, 1 }
+        shared.mem.lights[1].spread = 0.5
+        shared.mem.lights[1].brightness = 0.9
+        nodes = node_mem[MEM3_STIR:MEM3_ACHE+1]
     }
   }
