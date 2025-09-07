@@ -74,7 +74,7 @@ start :: proc "contextless" () {
   set_io(&shared.mem)
   init_nodes()
   init_actions()
-  load_location(.Day1_Memory)
+  load_location(.Day3_Dream_House)
 }
 
 last_hover : ^Node
@@ -247,8 +247,8 @@ draw_node :: proc "contextless" (node : ^Node) {
       can_act = true
     }
     {
-      action_size := 0.3*node.size
-      action_pos := node.pos + action_size*1.25*node.up
+      action_size := node.size/3/1.1
+      action_pos := node.pos + node.size/3*node.up
       for action, action_idx in node.actions {
         if !action.disabled && (!action.needs_reveal || node.sense_left_until_revealed == 0) {
           color := Color(0.5 + 0.5*clamp(action.use_progress, 0, 1))
@@ -295,6 +295,13 @@ draw_text :: proc "contextless" (str : string, pos : V3, right : V3, up : V3, si
   size := size/CHAR_SIZE
   str := str
   look_dist = max(f32)
+  total_height := f32(1)
+  for c in str {
+    if c == '\n' {
+      total_height -= 1
+    }
+  }
+  pos -= pivot.y*total_height*up
   for len(str) > 0 {
     total_width := f32(0)
     for c in str {
@@ -303,9 +310,8 @@ draw_text :: proc "contextless" (str : string, pos : V3, right : V3, up : V3, si
       }
       total_width += size*shared.mem.font_width[c]
     }
-    text_origin := pos
+    line_origin := pos
     pos -= pivot.x*total_width*right
-    pos -= pivot.y*up
     look_dist = min(look_dist, ray_quad_distance(look_origin, look_forward, pos, up, total_width*right))
     c_idx : int
     for c, idx in str {
@@ -346,7 +352,7 @@ draw_text :: proc "contextless" (str : string, pos : V3, right : V3, up : V3, si
     }
     draw_vert_buffer(.Text, vert_count)
     str = str[c_idx+1:]
-    pos = text_origin - up
+    pos = line_origin - up
   }
   return
 }

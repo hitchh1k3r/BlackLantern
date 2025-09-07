@@ -47,6 +47,7 @@ main :: proc() {
   }
 
   fmt.println("Building WASM...")
+    os.make_directory("artifacts")
     cmd : cstring
     if is_debug {
       cmd = "odin build src -o:none -debug -no-entry-point -no-crt -out:artifacts/g.wasm -target:freestanding_wasm32 -extra-linker-flags:\"--stack-first --lto-O3 --gc-sections\""
@@ -123,7 +124,7 @@ main :: proc() {
     fmt.println("  okay")
 
   if !is_debug { fmt.println("Creating ZIP Archive...")
-    os.change_directory("artifacts")
+    os.set_current_directory("artifacts")
     if exec("7z a -mX9 -tzip -y archive.zip g.wasm index.html > nul") == 0 {
       size := os.file_size_from_path("archive.zip")
       fmt.printfln("  okay (%.3f KiB - %.2f%%)", f32(size)/1024, f32(size)*100/13/1024)
