@@ -4,6 +4,27 @@ import "shared"
 
 // Nodes ///////////////////////////////////////////////////////////////////////////////////////////
 
+  Node :: struct {
+    disabled : bool,
+    name : string,
+    sense_left_until_revealed : u8,
+    pos : V3,
+    right : V3,
+    up : V3,
+    size : f32,
+    reveal : f32,
+    actions : []Action,
+    center : bool,
+  }
+
+  NodeSerial :: struct {
+    name : string,
+    using _ : bit_field u32 {
+      disabled : bool | 1,
+      sense_left_until_revealed : u8 | 3, // 0-7
+
+    },
+  }
   NodeId :: enum u8 {
     // ChildsRoom
       // Floor
@@ -239,7 +260,7 @@ import "shared"
             center = true,
             pos = { 0, 2.00, -10 },
             right = { 1.000000, 0.000000, 0.000000 },
-            up = { 0.000000, 1.000000, 0.000000 },
+            up = { 0.000000, 2.000000, 0.000000 },
             size = 6.500000,
           },
           .Dream3_Fears_Unfinishedness = {
@@ -248,7 +269,7 @@ import "shared"
             center = true,
             pos = { -10, 2.00, 0 },
             right = { 0.000000, 0.000000, -1.000000 },
-            up = { 0.000000, 1.000000, 0.000000 },
+            up = { 0.000000, 2.000000, 0.000000 },
             size = 6.500000,
           },
           .Dream3_Fears_Erasure = {
@@ -257,7 +278,7 @@ import "shared"
             center = true,
             pos = { 10, 2.00, 0 },
             right = { 0.000000, 0.000000, 1.000000 },
-            up = { 0.000000, 1.000000, 0.000000 },
+            up = { 0.000000, 2.000000, 0.000000 },
             size = 6.500000,
           },
           .Dream3_Outside_Tree = {
@@ -351,6 +372,21 @@ import "shared"
 
 // Actions /////////////////////////////////////////////////////////////////////////////////////////
 
+  Action :: struct {
+    disabled : bool,
+    needs_reveal : bool,
+    name : string,
+    used_name : string, // if "", then disabled when used
+    used : bool,
+    sense_reveal : u8,
+    use_progress : f32,
+    on_used : #type proc "contextless" (),
+  }
+
+  ActionSerial :: struct {
+    using _ : bit_field u32 {
+    },
+  }
   ActionId :: enum u8 {
     ChildsRoom_Floor_Bed_Smell,
     ChildsRoom_Floor_Bed_Feel,

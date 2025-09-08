@@ -30,30 +30,6 @@ Color :: distinct [4]f32
 C_BLACK :: Color{ 0, 0, 0, 1 }
 C_WHITE :: Color{ 1, 1, 1, 1 }
 
-Node :: struct {
-  disabled : bool,
-  name : string,
-  sense_left_until_revealed : u8,
-  pos : V3,
-  right : V3,
-  up : V3,
-  size : f32,
-  reveal : f32,
-  actions : []Action,
-  center : bool,
-}
-
-Action :: struct {
-  disabled : bool,
-  needs_reveal : bool,
-  name : string,
-  used_name : string, // if "", then disabled when used
-  used : bool,
-  sense_reveal : u8,
-  use_progress : f32,
-  on_used : #type proc "contextless" (),
-}
-
 question_marks := "????????????????????????????????"
 
 nodes : []Node
@@ -288,7 +264,7 @@ draw_node :: proc "contextless" (node : ^Node) {
 }
 
 draw_text :: proc "contextless" (str : string, pos : V3, right : V3, up : V3, size : f32, color := C_WHITE, pivot := V2(0.5)) -> (look_dist : f32) {
-  CHAR_SIZE :: 128
+  CHAR_SIZE :: 512
   vert_count := i32(0)
   pos := pos
   up := size*up

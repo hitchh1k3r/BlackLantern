@@ -19,9 +19,12 @@ layout(std140) uniform $U {
 
 out vec2 vTex;
 out vec4 vCol;
+out float vDepth;
 
 void main() {
-  gl_Position = (proj * view) * vec4(aPos, 1.0);
+  vec4 viewPos = view * vec4(aPos, 1.);
+  gl_Position = proj * viewPos;
   vTex = aTex;
   vCol = aCol;
+  vDepth = -viewPos.z;
 }

@@ -179,13 +179,13 @@ document.addEventListener("DOMContentLoaded", async () => {
           gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo);
 
           // Font Atlas:
-          const SIZE = 128;
+          const SIZE = 512;
           const atlas = document.createElement('canvas');
           const ctx = atlas.getContext('2d')
           atlas.width = atlas.height = 16*SIZE;
           ctx.fillStyle = 'black';
           ctx.fillRect(0, 0, 16*SIZE, 16*SIZE);
-          ctx.font = '100px Verdana';
+          ctx.font = '400px Verdana';
           ctx.fillStyle = 'white';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
