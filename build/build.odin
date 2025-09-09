@@ -10,6 +10,20 @@ import "beard"
 
 is_debug : bool
 
+when ODIN_OS == .Windows {
+  CMD_ODIN :: "odin"
+  CMD_WASMOPT :: "wasm-opt"
+  CMD_JAVA :: "..\\..\\jdk-24.0.2\\bin\\java"
+  CMD_CLOSURE_COMPILER_PATH :: "closure-compiler.jar"
+  CMD_7ZIP :: "7z"
+} else {
+  CMD_ODIN :: "odin"
+  CMD_WASMOPT :: "wasm-opt"
+  CMD_JAVA :: "java"
+  CMD_CLOSURE_COMPILER_PATH :: "closure-compiler.jar"
+  CMD_7ZIP :: "7z"
+}
+
 main :: proc() {
   // Setup:
     defer fmt.println("Done")
@@ -50,9 +64,9 @@ main :: proc() {
     os.make_directory("artifacts")
     cmd : cstring
     if is_debug {
-      cmd = "odin build src -o:none -debug -no-entry-point -no-crt -out:artifacts/g.wasm -target:freestanding_wasm32 -extra-linker-flags:\"--stack-first --lto-O3 --gc-sections\""
+      cmd = CMD_ODIN + " build src -o:none -debug -no-entry-point -no-crt -out:artifacts/g.wasm -target:freestanding_wasm32 -extra-linker-flags:\"--stack-first --lto-O3 --gc-sections\""
     } else {
-      cmd = "odin build src -o:aggressive -no-entry-point -no-crt -no-bounds-check -disable-assert -no-type-assert -obfuscate-source-code-locations -out:artifacts/full.wasm -target:freestanding_wasm32 -extra-linker-flags:\"--stack-first --lto-O3 --gc-sections --strip-all\""
+      cmd = CMD_ODIN + " build src -o:aggressive -no-entry-point -no-crt -no-bounds-check -disable-assert -no-type-assert -obfuscate-source-code-locations -out:artifacts/full.wasm -target:freestanding_wasm32 -extra-linker-flags:\"--stack-first --lto-O3 --gc-sections --strip-all\""
     }
     if exec(cmd) == 0 {
       fmt.println("  okay")
@@ -61,7 +75,7 @@ main :: proc() {
     }
 
   if !is_debug { fmt.println("Compressing WASM...")
-    if exec("wasm-opt -Oz --enable-bulk-memory --converge --low-memory-unused --zero-filled-memory --const-hoisting --ignore-implicit-traps artifacts/full.wasm -o artifacts/g.wasm") == 0 {
+    if exec(CMD_WASMOPT + " -Oz --enable-bulk-memory --converge --low-memory-unused --zero-filled-memory --const-hoisting --ignore-implicit-traps artifacts/full.wasm -o artifacts/g.wasm") == 0 {
       fmt.printfln("  okay (%.3f -> %.3f KiB)", f32(os.file_size_from_path("artifacts/full.wasm"))/1024, f32(os.file_size_from_path("artifacts/g.wasm"))/1024)
     } else {
       return
@@ -84,7 +98,7 @@ main :: proc() {
   if !is_debug { fmt.println("Compressing JS...")
     try_compressing_js: {
       if os.write_entire_file("artifacts/full.js", transmute([]u8)(js_str)) {
-        if exec("..\\..\\jdk-24.0.2\\bin\\java -jar closure-compiler.jar 2>&1 " +
+        if exec(CMD_JAVA + " -jar " + CMD_CLOSURE_COMPILER_PATH + " 2>&1 " +
                 "--compilation_level ADVANCED " +
                 "--js artifacts/full.js " +
                 "--externs closure-externs.js " +
@@ -125,7 +139,7 @@ main :: proc() {
 
   if !is_debug { fmt.println("Creating ZIP Archive...")
     os.set_current_directory("artifacts")
-    if exec("7z a -mX9 -tzip -y archive.zip g.wasm index.html > nul") == 0 {
+    if exec(CMD_7ZIP + " a -mX9 -tzip -y archive.zip g.wasm index.html > nul") == 0 {
       size := os.file_size_from_path("archive.zip")
       fmt.printfln("  okay (%.3f KiB - %.2f%%)", f32(size)/1024, f32(size)*100/13/1024)
     } else {
