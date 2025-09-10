@@ -15,6 +15,13 @@
       "file_regex": "^\\s*(.+)\\(([0-9]+):([0-9]+)\\)\\s(.+)$",
       "cmd": [ "odin", "run", "build" ],
     },
+    {
+      "name": "Meta - World Gen",
+      "quiet": true,
+      "working_dir": "$project_path/",
+      "file_regex": "^\\s*(.+)\\(([0-9]+):([0-9]+)\\)\\s(.+)$",
+      "cmd": [ "odin", "run", "meta/world_gen.odin", "-file" ],
+    },
   ],
   "folders":
   [

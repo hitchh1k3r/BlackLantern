@@ -14,5 +14,5 @@ void main() {
   float tex = texture(T, vTex).r;
   float distanceDarkening = smoothstep(15., 1.5, vDepth);
   distanceDarkening = .9*distanceDarkening + .1;
-  fragColor = vec4(tex) * vec4(vec3(distanceDarkening), 1) * vCol;
+  fragColor = vec4(tex) * vec4(vec3(distanceDarkening), 1.) * vCol;
 }

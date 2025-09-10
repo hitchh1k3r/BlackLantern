@@ -48,9 +48,8 @@ caption_ttl : f32
 start :: proc "contextless" () {
   dinit()
   set_io(&shared.mem)
-  init_nodes()
-  init_actions()
-  load_location(.Day3_Dream_House)
+  init_world()
+  load_location(.Dream3_House)
 }
 
 last_hover : ^Node
@@ -81,6 +80,7 @@ update :: proc "contextless" () {
     target_reveal := f32(0)
     if &node == hovering {
       target_reveal = 2
+      // NOCOMMIT update (and draw in drawing code) senses
       for &action, action_idx in hovering.actions {
         if action_idx == hover_action {
           if used_action != action_idx {
@@ -89,16 +89,20 @@ update :: proc "contextless" () {
             if !action.used {
               target_progress = min(1.01, action.use_progress);
               if action.use_progress > 1.1 {
+                // NOCOMMIT if parent node is memory, find next non-memory node, enable it, and decr it's sense counter
                 action.used = true
                 used_action = max(int)
-                if action.on_used != nil {
-                  action.on_used()
+                if action.caption != "" {
+                  caption(action.caption)
                 }
+                action_callback(action.on_used)
+                /*
                 if node.sense_left_until_revealed > action.sense_reveal {
                   node.sense_left_until_revealed -= action.sense_reveal
                 } else {
                   node.sense_left_until_revealed = 0
                 }
+                */
               }
             }
           }
@@ -226,15 +230,17 @@ draw_node :: proc "contextless" (node : ^Node) {
       action_size := node.size/3/1.1
       action_pos := node.pos + node.size/3*node.up
       for action, action_idx in node.actions {
-        if !action.disabled && (!action.needs_reveal || node.sense_left_until_revealed == 0) {
+        if !action.used {// } && (!action.needs_reveal || node.sense_left_until_revealed == 0) {
           color := Color(0.5 + 0.5*clamp(action.use_progress, 0, 1))
           color.a = 1
           color *= clamp(0.5*node.reveal*node.reveal, 0, 1)
           text := action.name
+          /*
           if action.used {
             text = action.used_name
             color.rgb *= 0.75
           }
+          */
           if text != "" {
             pivot := V2{ 0, 0.5 }
             if node.center {

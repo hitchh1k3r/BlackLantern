@@ -28,18 +28,11 @@ void main() {
   deformed_y = 1.25 * 1.-deformed_y*deformed_y;
   deformed_y = mix(deformed_y, abs(vTex.y), prog_4_out);
   float ring_dist = length(vec2(vTex.x, deformed_y));
-  float pupil_dist = mix(length(vec2(vTex.x, 0.6*vTex.y)), 1., progress);
+  float pupil_dist = mix(length(vec2(vTex.x, .6*vTex.y)), 1., progress);
   float ring = abs(.9-ring_dist);
   ring = smoothstep(.1, .085, ring);
   float angle = (atan(-vTex.x, -vTex.y) / 6.2831 + .5);
   float prog = ring * step(angle, reticle.x);
-  ring += 0.5*smoothstep(0.175, 0.15, pupil_dist);
-  fragColor = ring * (.1 + .6 * prog) * vec4(1., 0.8, .5, 1.);
-
-  /*
-  float ring = smoothstep(.1, .085, abs(.9-length(vTex)));
-  float angle = (atan(-vTex.x, -vTex.y) / 6.2831 + .5);
-  float prog = step(angle, reticle.x);
-  fragColor = ring * (.1 + .6 * prog) * vec4(1., 0.8, .5, 1.);
-  */
+  ring += .5*smoothstep(.175, .15, pupil_dist);
+  fragColor = ring * (.1 + .6 * prog) * vec4(1., .8, .5, 1.);
 }
