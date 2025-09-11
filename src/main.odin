@@ -43,19 +43,20 @@ target_scale := f32(1)
 target_translate := V3_ZERO
 caption_text : string
 caption_ttl : f32
+action_speed := f32(1.25)
 
 @(export, link_name="z")
 start :: proc "contextless" () {
   dinit()
   set_io(&shared.mem)
   init_world()
-  load_location(.Dream3_House)
+  load_location(.Memory1)
 }
 
 last_hover : ^Node
 hovering : ^Node
-hover_action := -1
-used_action := -1
+hover_action := -100
+delta_time : f32
 
 @(export, link_name="y")
 update :: proc "contextless" () {
@@ -64,7 +65,7 @@ update :: proc "contextless" () {
   if last_time < 0 {
     last_time = shared.mem.time
   }
-  delta_time := (shared.mem.time - last_time) / 1000
+  delta_time = (shared.mem.time - last_time) / 1000
   last_time = shared.mem.time
 
   caption_ttl -= delta_time
@@ -72,43 +73,58 @@ update :: proc "contextless" () {
   pitch += 0.001 * shared.mem.mouse_move.y
   pitch = clamp(pitch, -0.3*PI, 0.15*PI)
   shared.mem.mouse_move = 0
-  target_progress := f32(-0.01)
-  if used_action == max(int) {
-    used_action = hover_action
-  }
+  @(static)
+  target_progress : f32
+  target_progress = f32(-0.01)
   for &node, node_idx in nodes {
     target_reveal := f32(0)
     if &node == hovering {
       target_reveal = 2
-      // NOCOMMIT update (and draw in drawing code) senses
-      for &action, action_idx in hovering.actions {
-        if action_idx == hover_action {
-          if used_action != action_idx {
-            used_action = -1
-            action.use_progress += 1.25*delta_time
-            if !action.used {
-              target_progress = min(1.01, action.use_progress);
-              if action.use_progress > 1.1 {
-                // NOCOMMIT if parent node is memory, find next non-memory node, enable it, and decr it's sense counter
-                action.used = true
-                used_action = max(int)
-                if action.caption != "" {
-                  caption(action.caption)
+      for &action, sense in node.senses {
+        if update_action(&action.used, &action.use_progress, -int(sense)-1) {
+          node.sense_left_until_revealed -= 1
+        }
+      }
+      if node.sense_left_until_revealed == 0 {
+        for &action, action_idx in hovering.actions {
+          if update_action(&action.used, &action.use_progress, action_idx) {
+            if hovering.memory_fragment {
+              hovering.name = action.caption
+              hovering.size *= 0.25
+              for &reveal in nodes[node_idx:] {
+                if !reveal.memory_fragment {
+                  reveal.disabled = false
+                  if reveal.sense_left_until_revealed > 0 {
+                    reveal.sense_left_until_revealed -= 1
+                  }
+                  break
                 }
-                action_callback(action.on_used)
-                /*
-                if node.sense_left_until_revealed > action.sense_reveal {
-                  node.sense_left_until_revealed -= action.sense_reveal
-                } else {
-                  node.sense_left_until_revealed = 0
-                }
-                */
               }
+            } else {
+              if action.caption != "" {
+                caption(action.caption)
+              }
+            }
+            action_callback(action.on_used)
+          }
+        }
+      }
+
+      update_action :: proc "contextless" (used : ^bool, use_progress : ^f32, action_idx : int) -> bool {
+        if action_idx == hover_action {
+          use_progress^ += action_speed*delta_time
+          if !used^ {
+            target_progress = min(1.01, use_progress^);
+            if use_progress^ > 1.1 {
+              used^ = true
+              play_sound_effect(.Mew)
+              return true
             }
           }
         } else {
-          action.use_progress = 0
+          use_progress^ = 0
         }
+        return false
       }
     }
     node.reveal = lerp(node.reveal, target_reveal, half_life_interp(0.5, delta_time))
@@ -122,7 +138,7 @@ update :: proc "contextless" () {
   current_scale = lerp(current_scale, target_scale, half_life_interp(3, delta_time))
   last_hover = hovering
   hovering = nil
-  hover_action = -1
+  hover_action = -100
 }
 
 @(export, link_name="x")
@@ -213,7 +229,9 @@ ray_point_distance :: proc "contextless" (ray_origin : V3, ray_dir : V3, point :
 draw_node :: proc "contextless" (node : ^Node) {
   if !node.disabled {
     dist := f32(0.01)
-    look_dist := max(f32)
+    @(static)
+    look_dist : f32
+    look_dist = max(f32)
     color := Color(0.5 + 0.5*clamp(node.reveal, 0, 1))
     color.a = 1
     text := node.name
@@ -227,34 +245,57 @@ draw_node :: proc "contextless" (node : ^Node) {
       can_act = true
     }
     {
-      action_size := node.size/3/1.1
-      action_pos := node.pos + node.size/3*node.up
-      for action, action_idx in node.actions {
-        if !action.used {// } && (!action.needs_reveal || node.sense_left_until_revealed == 0) {
-          color := Color(0.5 + 0.5*clamp(action.use_progress, 0, 1))
+      @(static)
+      action_size : f32
+      action_size = node.size/3/1.1
+      @(static)
+      action_pos : V3
+      action_pos = node.pos + node.size/3*node.up
+      NAMES := [SenseId]string{
+        .Contour = "Contour",
+        .Smell = "Smell",
+        .Feel = "Feel",
+        .Listen = "Listen",
+        .Taste = "Taste",
+        .Poke = "Poke",
+      }
+      for action, sense in node.senses {
+        if action.response != "" {
+          name := NAMES[sense]
+          if action.used {
+            name = action.response
+          }
+          draw_action(name, action.used, node, action.use_progress, can_act, -int(sense)-1)
+        }
+      }
+      if node.sense_left_until_revealed == 0 {
+        for action, action_idx in node.actions {
+          if !action.used {
+            draw_action(action.name, action.used, node, action.use_progress, can_act, action_idx)
+          }
+        }
+      }
+
+      draw_action :: proc "contextless" (text : string, used : bool, node : ^Node, use_progress : f32, can_act : bool, action_idx : int) {
+        if text != "" {
+          color := Color(0.5 + 0.5*clamp(use_progress, 0, 1))
           color.a = 1
           color *= clamp(0.5*node.reveal*node.reveal, 0, 1)
-          text := action.name
-          /*
-          if action.used {
-            text = action.used_name
+          if used {
             color.rgb *= 0.75
           }
-          */
-          if text != "" {
-            pivot := V2{ 0, 0.5 }
-            if node.center {
-              pivot = 0.5
-            }
-            action_dist := draw_text(text, action_pos, node.right, node.up, action_size, color, pivot)
-            if action_dist <= 0.001 {
-              hover_action = action_idx
-            }
-            if can_act {
-              look_dist = min(look_dist, action_dist)
-            }
-            action_pos -= (1.1*action_size)*node.up
+          pivot := V2{ 0, 0.5 }
+          if node.center {
+            pivot = 0.5
           }
+          action_dist := draw_text(text, action_pos, node.right, node.up, action_size, color, pivot)
+          if action_dist <= 0.001 {
+            hover_action = action_idx
+          }
+          if can_act {
+            look_dist = min(look_dist, action_dist)
+          }
+          action_pos -= (1.1*action_size)*node.up
         }
       }
     }

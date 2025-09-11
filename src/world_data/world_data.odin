@@ -575,6 +575,7 @@ world := NS{
               caption = "The door turns to ash at your touch.",
               on_use = `
                 node_mem[.Dream3_House_Door].disabled = true
+                node_mem[.Dream3_House_Outside].disabled = false
                 `,
             }
           },
@@ -773,8 +774,8 @@ world := NS{
         {
           name = "Spoon",
           disabled = true,
-          centered = false,
-          memory = false,
+          centered = true,
+          memory = true,
           yaw = 0,
           pitch = -1,
           distance = .D1,
@@ -798,8 +799,8 @@ world := NS{
         {
           name = "Slide",
           disabled = true,
-          centered = false,
-          memory = false,
+          centered = true,
+          memory = true,
           yaw = -11,
           pitch = -1,
           distance = .D1,
@@ -823,8 +824,8 @@ world := NS{
         {
           name = "Ball",
           disabled = true,
-          centered = false,
-          memory = false,
+          centered = true,
+          memory = true,
           yaw = 11,
           pitch = -1,
           distance = .D1,
@@ -849,7 +850,7 @@ world := NS{
         {
           name = "Bed",
           disabled = true,
-          centered = false,
+          centered = true,
           memory = false, // exit memory
           yaw = 16,
           pitch = -3,
@@ -876,7 +877,7 @@ world := NS{
     },
   },
   "Credits" = Location{
-    setup = ``,
+    setup = `action_speed = 0.5`,
     texts = {
       {
         name = "A Game Made...",
@@ -932,235 +933,4 @@ world := NS{
       },
     },
   },
-}
-
-
-
-NodeSerial :: bit_field u32 {
-  // byte 0
-  sense_left_until_revealed : u8 | 3, // 0-7
-  center : bool | 1,
-  distance : u8 | 2,  // 1 2 4 16
-  rotation : u8 | 2,  // -35 0 35 ??
-
-  // byte 1
-  yaw_pos : u8 | 5,   // 11.25 degrees apart
-  pitch_pos : u8 | 3, // -40 -20 0 10 20 30 40 50
-
-  // byte 2
-  disabled : bool | 1,
-  action_count : u8 | 2, // 0-3
-  action1_callback : bool | 1,
-  action2_callback : bool | 1,
-  action3_callback : bool | 1,
-  _ : u8 | 2,
-
-  // byte 3
-  sense_contour : bool | 1,
-  sense_smell : bool | 1,
-  sense_feel : bool | 1,
-  sense_listen : bool | 1,
-  sense_taste : bool | 1,
-  sense_poke : bool | 1,
-  _ : u8 | 2,
-}
-
-main :: proc() {
-  string_pool : strings.Builder
-  strings.builder_init(&string_pool, 0, 4096)
-
-  locations : map[string]Location
-  process_ns("", world, &locations)
-  process_ns :: proc(prefix : string, ns : NS, locations : ^map[string]Location) {
-    for key, ns in ns {
-      prefix := prefix
-      if prefix != "" {
-        prefix = fmt.tprintf("%v_%v", prefix, key)
-      } else {
-        prefix = key
-      }
-      switch ns in ns {
-        case NS:
-          process_ns(prefix, ns, locations)
-        case Location:
-          locations[prefix] = ns
-      }
-    }
-  }
-
-  texts : [dynamic]Text
-  actions : [dynamic]Action
-  fmt.print("LocationId :: enum {\n")
-  for name, location in locations {
-    fmt.printf("  %v,\n", name)
-    for text in location.texts {
-      text := text
-      text.key = fmt.tprintf("%v_%v", name, to_key(text.name))
-      append(&texts, text)
-      add_string(&string_pool, text.name)
-      if text.sense_contour != "" {
-        add_string(&string_pool, text.sense_contour)
-      }
-      if text.sense_smell != "" {
-        add_string(&string_pool, text.sense_smell)
-      }
-      if text.sense_feel != "" {
-        add_string(&string_pool, text.sense_feel)
-      }
-      if text.sense_listen != "" {
-        add_string(&string_pool, text.sense_listen)
-      }
-      if text.sense_taste != "" {
-        add_string(&string_pool, text.sense_taste)
-      }
-      if text.sense_poke != "" {
-        add_string(&string_pool, text.sense_poke)
-      }
-      for action in text.actions {
-        action := action
-        action.key = fmt.tprintf("%v_%v", text.key, to_key(action.name))
-        append(&actions, action)
-        add_string(&string_pool, action.name)
-        add_string(&string_pool, action.caption)
-      }
-    }
-  }
-  fmt.print("}\n\n")
-
-  fmt.print("NodeId :: enum {\n")
-  for text in texts {
-    fmt.printf("  %v,\n", text.key)
-  }
-  fmt.print("}\n\n")
-
-  fmt.print("ActionId :: enum {\n")
-  for action in actions {
-    fmt.printf("  %v,\n", action.key)
-  }
-  fmt.print("}\n\n")
-
-  fmt.print("load_location :: proc \"contextless\" (location : LocationId) {\n")
-  fmt.print("  shared.mem.lights = {}\n")
-  fmt.print("  switch location {\n")
-  node_idx := 0
-  for name, location in locations {
-    fmt.printf("    case .%v:\n", name)
-    fmt.println(location.setup)
-    fmt.printf("      nodes = (transmute([^]Node)(&node_mem))[%v:%v]\n\n", node_idx, node_idx+len(location.texts))
-    node_idx += len(location.texts)
-  }
-  fmt.print("  }\n")
-  fmt.print("}\n\n")
-
-  // fmt.print("@(static)\n")
-  fmt.print("DATA_STRING := \"")
-  for c in strings.to_string(string_pool) {
-    if c == 0 {
-      fmt.print("\\x00")
-    } else {
-      fmt.print(c)
-    }
-  }
-  fmt.print("\"\n\n")
-
-  // fmt.print("@(static)\n")
-  fmt.print("DATA_TEXTS := [NodeId]NodeSerial{\n")
-  for text in texts {
-    data := NodeSerial{
-      sense_left_until_revealed = u8(text.sense_required),
-      center = text.centered,
-      distance = u8(text.distance),
-      rotation = u8(text.rotation),
-      yaw_pos = u8(text.yaw %% 32),
-      pitch_pos = u8(text.pitch + 3),
-      disabled = text.disabled,
-      action_count = u8(len(text.actions)),
-      action1_callback = len(text.actions) >= 1 && text.actions[0].on_use != "",
-      action2_callback = len(text.actions) >= 2 && text.actions[1].on_use != "",
-      action3_callback = len(text.actions) >= 3 && text.actions[2].on_use != "",
-      sense_contour = text.sense_contour != "",
-      sense_smell = text.sense_smell != "",
-      sense_feel = text.sense_feel != "",
-      sense_listen = text.sense_listen != "",
-      sense_taste = text.sense_taste != "",
-      sense_poke = text.sense_poke != "",
-    }
-    fmt.printf("  .%v = auto_cast %v,\n", text.key, u32(data))
-  }
-  fmt.print("}\n\n")
-
-  fmt.print("action_callback :: proc \"contextless\" (idx : u8) {\n")
-  fmt.print("  switch idx {\n")
-  callback_idx := 1
-  for action, idx in actions {
-    if action.on_use != "" {
-      fmt.printf("\n    case %v:\n", callback_idx)
-      callback_idx += 1
-      fmt.print(action.on_use)
-    }
-  }
-  fmt.print("\n  }\n")
-  fmt.print("}\n\n")
-}
-
-add_string :: proc(sb : ^strings.Builder, str : string) {
-  if str == "" {
-    strings.write_rune(sb, 0)
-    strings.write_rune(sb, 0)
-    return
-  }
-
-  {
-    last_can_break := true
-    if len(sb.buf) > 0 {
-      r := sb.buf[len(sb.buf)-1]
-      last_can_break = (r >= 'a' && r <= 'z') || r == '.' || r == '!'
-    }
-    if str[0] < 'A' || str[0] > 'Z' {
-      strings.write_rune(sb, 0)
-    }
-  }
-
-  last_can_break := false
-  for c, i in str {
-    if c == '\x00' {
-      fmt.eprintf("String \"%v\" contains breaking pattern at: %v!", str, i)
-      os.exit(1)
-    }
-    if last_can_break && c >= 'A' && c <= 'Z' {
-      fmt.eprintf("String \"%v\" contains breaking pattern at: %v!", str, i)
-      os.exit(1)
-    }
-    last_can_break = (c >= 'a' && c <= 'z') || c == '.' || c == '!'
-    if c == '\n' {
-      strings.write_string(sb, "\\n")
-    } else if c == '"' {
-      strings.write_string(sb, "\\\"")
-    } else {
-      strings.write_rune(sb, c)
-    }
-  }
-}
-
-
-to_key :: proc(str : string) -> string {
-  s := strings.trim_space(str)
-  b: strings.Builder
-  strings.builder_init(&b, 0, len(s))
-  w := strings.to_writer(&b)
-
-  strings.string_case_iterator(w, s, proc(w: io.Writer, prev, curr, next: rune) {
-    if !strings.is_delimiter(curr) && !strings.contains_rune(".!", curr) {
-      if strings.is_delimiter(prev) || prev == 0 || (unicode.is_lower(prev) && unicode.is_upper(curr)) {
-        if prev != 0 {
-          io.write_rune(w, '_')
-        }
-        io.write_rune(w, unicode.to_upper(curr))
-      } else {
-        io.write_rune(w, unicode.to_lower(curr))
-      }
-    }
-  })
-
-  return strings.to_string(b)
 }

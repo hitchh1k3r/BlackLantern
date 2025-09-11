@@ -12,7 +12,7 @@ out vec4 fragColor;
 
 void main() {
   float tex = texture(T, vTex).r;
-  float distanceDarkening = smoothstep(15., 1.5, vDepth);
+  float distanceDarkening = smoothstep(50., 1.5, vDepth);
   distanceDarkening = .9*distanceDarkening + .1;
   fragColor = vec4(tex) * vec4(vec3(distanceDarkening), 1.) * vCol;
 }

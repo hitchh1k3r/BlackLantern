@@ -29,6 +29,7 @@ main :: proc() {
     defer fmt.println("Done")
 
     shared_mem_init()
+    write_world_data_file()
 
     is_debug = len(os.args) > 1 && os.args[1] == "DEBUG"
     if is_debug {
