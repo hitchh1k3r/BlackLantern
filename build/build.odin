@@ -30,6 +30,7 @@ main :: proc() {
 
     shared_mem_init()
     write_world_data_file()
+    write_sound_file()
 
     is_debug = len(os.args) > 1 && os.args[1] == "DEBUG"
     if is_debug {

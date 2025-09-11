@@ -50,7 +50,7 @@ start :: proc "contextless" () {
   dinit()
   set_io(&shared.mem)
   init_world()
-  load_location(.Memory1)
+  load_location(.Memory3)
 }
 
 last_hover : ^Node
@@ -117,7 +117,6 @@ update :: proc "contextless" () {
             target_progress = min(1.01, use_progress^);
             if use_progress^ > 1.1 {
               used^ = true
-              play_sound_effect(.Mew)
               return true
             }
           }
@@ -383,17 +382,4 @@ draw_text :: proc "contextless" (str : string, pos : V3, right : V3, up : V3, si
 caption :: #force_inline proc "contextless" (text : string, time := f32(30)) {
   caption_text = text
   caption_ttl = time
-}
-
-play_sound :: proc "contextless" (times : []f32, freqs : []f32, gains : []f32, volume := f32(1)) {
-  layer_count := i32(len(freqs) / len(times))
-  time_count := len(times)
-  idx := 0
-  copy(shared.mem.audio_buffer[idx:], times)
-  idx += time_count
-  copy(shared.mem.audio_buffer[idx:], freqs)
-  idx += len(freqs)
-  copy(shared.mem.audio_buffer[idx:], gains)
-  idx += len(gains)
-  _play_sound_effect(layer_count, i32(time_count), volume)
 }

@@ -1,19 +1,84 @@
 package build
 
+import "core:strings"
 import "core:math"
 import "core:fmt"
+import "core:os"
 import "core:image/png"
 
-/*
-main :: proc() {
-  // NOCOMMIT 5020 is too big! maybe we should do a log scale?
-  gen_sound("res/sounds/mew.png",    5020, 0.763, -47, -17)
-  gen_sound("res/sounds/mewowl.png", 4000, 0.95,  -60, -10)
-  gen_sound("res/sounds/piano.png",  1860, 1.5,   -36, -19)
-}
-*/
+FREQ_POWER :: 10.0
+FREQ_MIN :: 400
+FREQ_MAX :: 5200
 
-gen_sound :: proc(file : string, max_freq : f32, max_time : f32, min_db : f32, max_db : f32) -> string {
+write_sound_file :: proc() {
+  file_out : strings.Builder
+  strings.builder_init(&file_out, 0, 32768)
+
+  fmt.sbprint(&file_out, ""+
+`package main
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Automatically Generated File ////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Do not edit, changes will be overwritten...
+
+import "shared"
+
+SoundId :: enum {
+  Mew,
+  Mewowl,
+  Siren,
+}
+
+Sound :: struct {
+  length : f32,
+  times : []u8,
+  frequencies : []u8,
+  amplitudes : []u8,
+}
+
+SOUNDS := [SoundId]Sound {
+`)
+  gen_sound(&file_out, "Mew",    "res/sounds/mew.png",    5020,  0.76, -47, -17)
+  gen_sound(&file_out, "Mewowl", "res/sounds/mewowl.png", 4000,  0.95, -60, -10)
+  gen_sound(&file_out, "Siren",  "res/sounds/siren.png",  2500, 10.40, -63, -22)
+
+  fmt.sbprint(&file_out, ""+
+`}
+
+play_sound :: proc "contextless" (sound : SoundId, volume := f32(1)) {
+  sound := SOUNDS[sound]
+
+  sample_count := len(sound.times)
+  layer_count := len(sound.frequencies) / sample_count
+
+  write_idx := 0
+  for i in 0..<sample_count {
+    shared.mem.audio_buffer[write_idx] = f32(sound.times[i]) / 255 * sound.length
+    write_idx += 1
+  }
+  for i in 0..<layer_count*sample_count {
+`)
+  fmt.sbprintf(&file_out, ""+
+`    FREQ_POWER :: %v
+    FREQ_MIN :: %v
+    FREQ_MAX :: %v
+`, FREQ_POWER, FREQ_MIN, FREQ_MAX)
+  fmt.sbprint(&file_out, ""+
+`    freq := f32(sound.frequencies[i]) / 255
+    shared.mem.audio_buffer[write_idx] = FREQ_MIN + pow(freq, FREQ_POWER) * (FREQ_MAX - FREQ_MIN)
+    shared.mem.audio_buffer[write_idx + sample_count*layer_count] = f32(sound.amplitudes[i]) / 255
+    write_idx += 1
+  }
+  _play_sound_effect(i32(layer_count), i32(sample_count), volume)
+}
+`)
+
+  os.write_entire_file("src/sounds_.odin", file_out.buf[:])
+}
+
+gen_sound :: proc(sb : ^strings.Builder, name : string, file : string, max_freq : f32, max_time : f32, min_db : f32, max_db : f32) {
   img, _ := png.load_from_file(file)
 
   time_per_pixel := max_time / f32(img.width)
@@ -111,31 +176,32 @@ gen_sound :: proc(file : string, max_freq : f32, max_time : f32, min_db : f32, m
   }
 
   // Print Out:
-  fmt.print("{\n")
-  fmt.printf("  length =      %v,\n", max_time)
-  fmt.print("  times =       {")
-  print_cut_array(times[:], cut_frames[:], 0, times[len(times)-1])
-  fmt.print(" },\n")
-  fmt.print("  frequencies = {")
-  print_cut_array(harmonics[0].frequencies[:], cut_frames[:], 400, 4400)
+  fmt.sbprintf(sb, "  .%v = {{\n", name)
+  fmt.sbprintf(sb, "    length =      %v,\n", max_time)
+  fmt.sbprint(sb, "    times =       {")
+  print_cut_array(sb, times[:], cut_frames[:], 0, times[len(times)-1])
+  fmt.sbprint(sb, " },\n")
+  fmt.sbprint(sb, "    frequencies = {")
+  print_cut_array(sb, harmonics[0].frequencies[:], cut_frames[:], FREQ_MIN, FREQ_MAX, FREQ_POWER)
   for i in 1..<harm_count {
-    fmt.print("\n                 ")
-    print_cut_array(harmonics[i].frequencies[:], cut_frames[:], 400, 4400)
+    fmt.sbprint(sb, "\n                   ")
+    print_cut_array(sb, harmonics[i].frequencies[:], cut_frames[:], FREQ_MIN, FREQ_MAX, FREQ_POWER)
   }
-  fmt.print(" },\n")
-  fmt.print("  amplitudes =  {")
-  print_cut_array(harmonics[0].amplitudes[:], cut_frames[:], 0, 1)
+  fmt.sbprint(sb, " },\n")
+  fmt.sbprint(sb, "    amplitudes =  {")
+  print_cut_array(sb, harmonics[0].amplitudes[:], cut_frames[:], 0, 0.667)
   for i in 1..<harm_count {
-    fmt.print("\n                 ")
-    print_cut_array(harmonics[i].amplitudes[:], cut_frames[:], 0, 1)
+    fmt.sbprint(sb, "\n                   ")
+    print_cut_array(sb, harmonics[i].amplitudes[:], cut_frames[:], 0, 0.667)
   }
-  fmt.print(" },\n")
-  fmt.print("}\n\n")
+  fmt.sbprint(sb, " },\n")
+  fmt.sbprint(sb, "  },\n")
 
-  print_cut_array :: proc(arr : []f32, cuts : []bool, min : f32, max : f32) {
+  print_cut_array :: proc(sb : ^strings.Builder, arr : []f32, cuts : []bool, min : f32, max : f32, power := f32(1)) {
     for a, idx in arr {
       if !cuts[idx] {
-        fmt.printf(" % 3d,", u8(math.round(255 * (a - min) / (max - min))))
+        t := clamp(math.unlerp(min, max, a), 0, 1)
+        fmt.sbprintf(sb, " % 3d,", u8(math.round(255 * math.pow(t, 1/power))))
       }
     }
   }
@@ -158,5 +224,5 @@ gen_sound :: proc(file : string, max_freq : f32, max_time : f32, min_db : f32, m
     return -1
   }
 
-  return ""
+  return
 }
