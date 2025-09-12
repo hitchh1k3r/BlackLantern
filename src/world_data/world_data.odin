@@ -689,9 +689,9 @@ world := NS{
               on_use = `
                 node_mem[.Dream3_Outside_Tree].disabled = true
                 node_mem[.Dream3_Outside_Erasure].disabled = false
-                node_mem[.Dream3_Outside_Slide].disabled = false
-                node_mem[.Dream3_Outside_Ball].sense_left_until_revealed -= 1
-                node_mem[.Dream3_Outside_Spoon].sense_left_until_revealed -= 1
+                node_mem[.Dream3_Outside_Photo_Slide].disabled = false
+                node_mem[.Dream3_Outside_Toy_Ball].sense_left_until_revealed -= 1
+                node_mem[.Dream3_Outside_Wooden_Spoon].sense_left_until_revealed -= 1
                 `,
             }
           },
@@ -720,9 +720,9 @@ world := NS{
               on_use = `
                 node_mem[.Dream3_Outside_Street].disabled = true
                 node_mem[.Dream3_Outside_Unfinishedness].disabled = false
-                node_mem[.Dream3_Outside_Ball].disabled = false
-                node_mem[.Dream3_Outside_Slide].sense_left_until_revealed -= 1
-                node_mem[.Dream3_Outside_Spoon].sense_left_until_revealed -= 1
+                node_mem[.Dream3_Outside_Toy_Ball].disabled = false
+                node_mem[.Dream3_Outside_Photo_Slide].sense_left_until_revealed -= 1
+                node_mem[.Dream3_Outside_Wooden_Spoon].sense_left_until_revealed -= 1
                 `,
             }
           },
@@ -752,15 +752,15 @@ world := NS{
                 play_sound(.Mewowl)
                 node_mem[.Dream3_Outside_Moon].disabled = true
                 node_mem[.Dream3_Outside_Insignificance].disabled = false
-                node_mem[.Dream3_Outside_Spoon].disabled = false
-                node_mem[.Dream3_Outside_Slide].sense_left_until_revealed -= 1
-                node_mem[.Dream3_Outside_Ball].sense_left_until_revealed -= 1
+                node_mem[.Dream3_Outside_Wooden_Spoon].disabled = false
+                node_mem[.Dream3_Outside_Photo_Slide].sense_left_until_revealed -= 1
+                node_mem[.Dream3_Outside_Toy_Ball].sense_left_until_revealed -= 1
                 `,
             }
           },
         },
         {
-          name = "Spoon",
+          name = "Wooden Spoon",
           disabled = true,
           centered = true,
           memory = true,
@@ -787,7 +787,7 @@ world := NS{
           },
         },
         {
-          name = "Slide",
+          name = "Photo Slide",
           disabled = true,
           centered = true,
           memory = true,
@@ -814,7 +814,7 @@ world := NS{
           },
         },
         {
-          name = "Ball",
+          name = "Toy Ball",
           disabled = true,
           centered = true,
           memory = true,
@@ -901,7 +901,7 @@ world := NS{
             on_use = ``,
           },
           {
-            name = "For JS13K 2025",
+            name = "For Js13kGames 2025",
             caption = "",
             on_use = ``,
           },
