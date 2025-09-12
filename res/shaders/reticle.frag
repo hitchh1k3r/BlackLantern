@@ -34,5 +34,6 @@ void main() {
   float angle = (atan(-vTex.x, -vTex.y) / 6.2831 + .5);
   float prog = ring * step(angle, reticle.x);
   ring += .5*smoothstep(.175, .15, pupil_dist);
-  fragColor = ring * (.1 + .6 * prog) * vec4(1., .8, .5, 1.);
+  float bg_circle = .2-.2*ring_dist;
+  fragColor = mix(vec4(0., 0., 0., bg_circle), (.1 + .6 * prog) * vec4(1., .8, .5, 1.), ring);
 }
