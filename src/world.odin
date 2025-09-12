@@ -128,9 +128,13 @@ init_world :: proc "contextless" () {
       action_idx += 1
     }
   }
-  node_mem[.Dream3_Outside_Insignificance].size = 20
-  node_mem[.Dream3_Outside_Unfinishedness].size = 20
-  node_mem[.Dream3_Outside_Erasure].size = 20
+  node_mem[.Dream_Outside_Insignificance].size = 20
+  node_mem[.Dream_Outside_Unfinishedness].size = 20
+  node_mem[.Dream_Outside_Erasure].size = 20
+  node_mem[.Dream_Outside_Moon].size *= 2
+  action_mem[.ChildsRoom_Desk_Window_hello].used = true
+  action_mem[.CanSleep].used = true
+  action_mem[.HallDoor_CanGo].used = true
 }
 
 get_string :: proc "contextless" () -> (result : string) {
@@ -146,9 +150,28 @@ get_string :: proc "contextless" () -> (result : string) {
       DATA_STRING = DATA_STRING[i:]
       return
     }
-    last_can_break = (r >= 'a' && r <= 'z') || r == '.' || r == '!'
+    last_can_break = (r >= 'a' && r <= 'z') || r == '.' || r == '!' || r == '\"'
   }
 
   result = DATA_STRING
   return
+}
+
+reset_dream :: proc "contextless" (exit : ActionId) {
+  action_mem[.CantSleep].used = true
+  action_mem[.CanSleep].used = false
+
+  node_mem[.Dream_House_Table].pos = { -4, 1, -2}
+  node_mem[.Dream_House_Chair].disabled = false
+  node_mem[.Dream_House_Door].disabled = false
+  node_mem[.Dream1_Wake].disabled = true
+  node_mem[.Dream2_Wake].disabled = true
+  node_mem[.Dream_House_Outside].disabled = true
+
+  action_mem[.Dream_House_Chair_Scratch].used = false
+  action_mem[.Dream_House_Window_Look].used = false
+  action_mem[.Dream1_Door].used = true
+  action_mem[.Dream2_Door].used = true
+  action_mem[.Dream3_Door].used = true
+  action_mem[exit].used = false
 }

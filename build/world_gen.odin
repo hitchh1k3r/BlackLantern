@@ -81,7 +81,9 @@ write_world_data_file :: proc() {
     fmt.sbprintf(&file_out, "  %v,\n", name)
     for text in location.texts {
       text := text
-      text.key = fmt.tprintf("%v_%v", name, to_key(text.name))
+      if text.key == "" {
+        text.key = fmt.tprintf("%v_%v", name, to_key(text.name))
+      }
       append(&texts, text)
       add_string(&string_pool, text.name)
       if text.sense_contour != "" {
@@ -104,7 +106,9 @@ write_world_data_file :: proc() {
       }
       for action in text.actions {
         action := action
-        action.key = fmt.tprintf("%v_%v", text.key, to_key(action.name))
+        if action.key == "" {
+          action.key = fmt.tprintf("%v_%v", text.key, to_key(action.name))
+        }
         append(&actions, action)
         add_string(&string_pool, action.name)
         add_string(&string_pool, action.caption)
@@ -176,7 +180,7 @@ write_world_data_file :: proc() {
   }
   fmt.sbprint(&file_out, "}\n\n")
 
-  fmt.sbprint(&file_out, "action_callback :: proc \"contextless\" (idx : u8) {\n")
+  fmt.sbprint(&file_out, "action_callback :: proc \"contextless\" (idx : u8, this_node : ^Node, this_action : ^Action) {\n")
   fmt.sbprint(&file_out, "  switch idx {\n")
   callback_idx := 1
   for action, idx in actions {
@@ -219,7 +223,7 @@ add_string :: proc(sb : ^strings.Builder, str : string) {
       fmt.eprintf("String \"%v\" contains breaking pattern at: %v!", str, i)
       os.exit(1)
     }
-    last_can_break = (c >= 'a' && c <= 'z') || c == '.' || c == '!'
+    last_can_break = (c >= 'a' && c <= 'z') || c == '.' || c == '!' || c == '\"'
     if c == '\n' {
       strings.write_string(sb, "\\n")
     } else if c == '"' {
@@ -237,7 +241,7 @@ to_key :: proc(str : string) -> string {
   w := strings.to_writer(&b)
 
   strings.string_case_iterator(w, s, proc(w: io.Writer, prev, curr, next: rune) {
-    if !strings.is_delimiter(curr) && !strings.contains_rune(".!", curr) {
+    if !strings.is_delimiter(curr) && !strings.contains_rune(".!\"", curr) {
       if strings.is_delimiter(prev) || prev == 0 || (unicode.is_lower(prev) && unicode.is_upper(curr)) {
         if prev != 0 {
           io.write_rune(w, '_')

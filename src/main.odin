@@ -44,13 +44,14 @@ target_translate := V3_ZERO
 caption_text : string
 caption_ttl : f32
 action_speed := f32(1.25)
+action_cooldown : f32
 
 @(export, link_name="z")
 start :: proc "contextless" () {
   dinit()
   set_io(&shared.mem)
   init_world()
-  load_location(.Memory3)
+  load_location(.ChildsRoom_Floor)
 }
 
 last_hover : ^Node
@@ -68,10 +69,11 @@ update :: proc "contextless" () {
   delta_time = (shared.mem.time - last_time) / 1000
   last_time = shared.mem.time
 
+  action_cooldown -= delta_time
   caption_ttl -= delta_time
   yaw += 0.001 * shared.mem.mouse_move.x
   pitch += 0.001 * shared.mem.mouse_move.y
-  pitch = clamp(pitch, -0.3*PI, 0.15*PI)
+  pitch = clamp(pitch, -0.3*PI, 0.2*PI)
   shared.mem.mouse_move = 0
   @(static)
   target_progress : f32
@@ -81,16 +83,18 @@ update :: proc "contextless" () {
     if &node == hovering {
       target_reveal = 2
       for &action, sense in node.senses {
-        if update_action(&action.used, &action.use_progress, -int(sense)-1) {
+        if update_action(&action.used, &action.use_progress, -int(sense)-1) && node.sense_left_until_revealed > 0 {
+          action_cooldown = 0.5
           node.sense_left_until_revealed -= 1
         }
       }
       if node.sense_left_until_revealed == 0 {
         for &action, action_idx in hovering.actions {
           if update_action(&action.used, &action.use_progress, action_idx) {
+            action_cooldown = 2
             if hovering.memory_fragment {
               hovering.name = action.caption
-              hovering.size *= 0.25
+              hovering.size *= 0.5
               for &reveal in nodes[node_idx:] {
                 if !reveal.memory_fragment {
                   reveal.disabled = false
@@ -105,13 +109,13 @@ update :: proc "contextless" () {
                 caption(action.caption)
               }
             }
-            action_callback(action.on_used)
+            action_callback(action.on_used, &node, &action)
           }
         }
       }
 
       update_action :: proc "contextless" (used : ^bool, use_progress : ^f32, action_idx : int) -> bool {
-        if action_idx == hover_action {
+        if action_idx == hover_action && action_cooldown <= 0 {
           use_progress^ += action_speed*delta_time
           if !used^ {
             target_progress = min(1.01, use_progress^);
@@ -384,7 +388,7 @@ draw_text :: proc "contextless" (str : string, pos : V3, right : V3, up : V3, si
   return
 }
 
-caption :: #force_inline proc "contextless" (text : string, time := f32(30)) {
+caption :: #force_inline proc "contextless" (text : string, time := f32(10)) {
   caption_text = text
   caption_ttl = time
 }
