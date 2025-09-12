@@ -134,6 +134,7 @@ init_world :: proc "contextless" () {
   node_mem[.Dream_Outside_Moon].size *= 2
   action_mem[.ChildsRoom_Desk_Window_hello].used = true
   action_mem[.CanSleep].used = true
+  action_mem[.Kitchen_CanGo].used = true
   action_mem[.HallDoor_CanGo].used = true
 }
 
@@ -150,7 +151,7 @@ get_string :: proc "contextless" () -> (result : string) {
       DATA_STRING = DATA_STRING[i:]
       return
     }
-    last_can_break = (r >= 'a' && r <= 'z') || r == '.' || r == '!' || r == '\"'
+    last_can_break = (r >= 'a' && r <= 'z') || r == '.' || r == '!' || r == '\"' || r == '\''
   }
 
   result = DATA_STRING

@@ -447,7 +447,8 @@ world := NS{
               name = "Leave Room",
               caption = "You slip between the door and the wall.",
               on_use = `
-                load_location(.Memory2)
+                load_location(.LivingRoom_Doorway)
+                this_action.used = false
                 `,
             }
           },
@@ -520,12 +521,356 @@ world := NS{
     },
   },
   "LivingRoom" = NS{
-    "Doorwar" = Location{},
-    "Rug" = Location{},
-    "Sofa" = Location{},
+    "Doorway" = Location{
+      setup = `
+        shared.mem.lights[0].dir = { 2, 4, 5 }
+        shared.mem.lights[0].color = 0.4*{ 1, 1, 0.95 }
+        shared.mem.lights[0].spread = 0.5
+        shared.mem.lights[0].brightness = 0.5
+        shared.mem.lights[1].dir = { 8, 3, 8 }
+        shared.mem.lights[1].color = 0.333*{ 1, 1, 0.5 }
+        shared.mem.lights[1].spread = 0.25
+        shared.mem.lights[1].brightness = 0.5
+      `,
+      texts = {
+        {
+          name = "Hallway",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = 6,
+          pitch = 2,
+          distance = .D9,
+          rotation = .Center,
+          sense_required = 0,
+          sense_contour = "",
+          sense_smell = "",
+          sense_feel = "",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "",
+          actions = {
+            {
+              name = "Goto Child's Room",
+              caption = "",
+              on_use = `
+                load_location(.ChildsRoom_Doorway)
+                this_action.used = false
+                `,
+            },
+          },
+        },
+        {
+          name = "Kitchen",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -2,
+          pitch = 2,
+          distance = .D3,
+          rotation = .Center,
+          sense_required = 3,
+          sense_contour = "doorway",
+          sense_smell = "food",
+          sense_feel = "",
+          sense_listen = "buzzing",
+          sense_taste = "",
+          sense_poke = "",
+          actions = {
+            {
+              key = "Kitchen_CantGo",
+              name = "Enter",
+              caption = "Your water is not that way.",
+              on_use = ``,
+            },
+            {
+              key = "Kitchen_CanGo",
+              name = "Enter",
+              caption = "",
+              on_use = `
+                load_location(.Kitchen_Doorway)
+                this_action.used = false
+                `,
+            },
+          },
+        },
+        {
+          name = "Rug",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -14,
+          pitch = -2,
+          distance = .D1,
+          rotation = .Center,
+          sense_required = 3,
+          sense_contour = "",
+          sense_smell = "feet",
+          sense_feel = "coarse, fuzz",
+          sense_listen = "",
+          sense_taste = "fuzz",
+          sense_poke = "",
+          actions = {
+            {
+              name = "Scratch",
+              caption = "Your claws break and curl the threads.",
+              on_use = ``,
+            },
+            {
+              name = "Goto",
+              caption = "",
+              on_use = `
+                load_location(.LivingRoom_Rug)
+                this_action.used = false
+                `,
+            },
+          },
+        },
+      }
+    },
+    "Rug" = Location{
+      setup = `
+        shared.mem.lights[0].dir = { 2, 4, 2 }
+        shared.mem.lights[0].color = 0.66*{ 1, 1, 0.95 }
+        shared.mem.lights[0].spread = 0.5
+        shared.mem.lights[0].brightness = 0.5
+        shared.mem.lights[1].dir = { 8, 3, 1 }
+        shared.mem.lights[1].color = 0.5*{ 1, 1, 0.5 }
+        shared.mem.lights[1].spread = 0.5
+        shared.mem.lights[1].brightness = 0.25
+      `,
+      texts = {
+        {
+          name = "Doorway",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = 2,
+          pitch = 1,
+          distance = .D3,
+          rotation = .Center,
+          sense_required = 0,
+          sense_contour = "",
+          sense_smell = "",
+          sense_feel = "",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "",
+          actions = {
+            {
+              name = "Goto",
+              caption = "",
+              on_use = `
+                load_location(.LivingRoom_Doorway)
+                this_action.used = false
+                `,
+            },
+          },
+        },
+        {
+          name = "Couch",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = 10,
+          pitch = 2,
+          distance = .D3,
+          rotation = .Center,
+          sense_required = 2,
+          sense_contour = "wide, tall",
+          sense_smell = "sun cooked",
+          sense_feel = "warm, soft",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "squishy",
+          actions = {
+            {
+              name = "Climb",
+              caption = "",
+              on_use = `
+                load_location(.LivingRoom_Couch)
+                this_action.used = false
+                `,
+            },
+          },
+        },
+        {
+          name = "Water Bowl",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -12,
+          pitch = 0,
+          distance = .D1,
+          rotation = .Center,
+          sense_required = 5,
+          sense_contour = "shallow, round",
+          sense_smell = "clean",
+          sense_feel = "cold, wet",
+          sense_listen = "",
+          sense_taste = "metal, water",
+          sense_poke = "sloshy",
+          actions = {
+            {
+              name = "Drink",
+              caption = "Cool water, you feel a bit better.",
+              on_use = ``,
+            },
+          },
+        },
+        {
+          name = "Food Bowl",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -8,
+          pitch = 0,
+          distance = .D1,
+          rotation = .Center,
+          sense_required = 2,
+          sense_contour = "shallow, round",
+          sense_smell = "faint food",
+          sense_feel = "",
+          sense_listen = "",
+          sense_taste = "metal, empty",
+          sense_poke = "",
+          actions = {
+          },
+        },
+      }
+    },
+    "Couch" = Location{
+      setup = `
+        shared.mem.lights[0].dir = { -5, 3, -2 }
+        shared.mem.lights[0].color = 0.6*{ 1, 1, 0.95 }
+        shared.mem.lights[0].spread = 0.5
+        shared.mem.lights[0].brightness = 0.5
+        shared.mem.lights[1].dir = { -1, 2, 3 }
+        shared.mem.lights[1].color = 0.75*{ 1, 1, 0.5 }
+        shared.mem.lights[1].spread = 0.25
+        shared.mem.lights[1].brightness = 0.25
+      `,
+      texts = {
+        {
+          name = "Rug",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -6,
+          pitch = -3,
+          distance = .D3,
+          rotation = .Center,
+          sense_required = 0,
+          sense_contour = "",
+          sense_smell = "",
+          sense_feel = "",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "",
+          actions = {
+            {
+              name = "Goto",
+              caption = "",
+              on_use = `
+                load_location(.LivingRoom_Rug)
+                this_action.used = false
+                `,
+            },
+          },
+        },
+        {
+          name = "Knitted Blanket",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = 14,
+          pitch = 2,
+          distance = .D1,
+          rotation = .Center,
+          sense_required = 2,
+          sense_contour = "flat, cloth",
+          sense_smell = "yarn",
+          sense_feel = "hot",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "",
+          actions = {
+            {
+              name = "Kneed",
+              caption = "Your claws catch in the yarn.",
+              on_use = ``,
+            },
+          },
+        },
+        {
+          name = "Table",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -12,
+          pitch = -3,
+          distance = .D1,
+          rotation = .Center,
+          sense_required = 3,
+          sense_contour = "flat",
+          sense_smell = "",
+          sense_feel = "smooth",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "solid",
+          actions = {
+          },
+        },
+        {
+          name = "Projector",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -12,
+          pitch = 2,
+          distance = .D3,
+          rotation = .Right,
+          sense_required = 3,
+          sense_contour = "mechanism",
+          sense_smell = "burnt dust",
+          sense_feel = "plastic",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "",
+          actions = {
+          },
+        },
+        {
+          name = "Photo Slide",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -9,
+          pitch = 1,
+          distance = .D3,
+          rotation = .Center,
+          sense_required = 3,
+          sense_contour = "square",
+          sense_smell = "plastic, cardboard",
+          sense_feel = "",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "flex",
+          actions = {
+            {
+              name = "Remember",
+              caption = "This was the fathers...",
+              on_use = `
+                load_location(.Memory2)
+                `,
+            },
+          },
+        },
+      }
+    },
   },
   "Kitchen" = NS{
-    "Doorwar" = Location{},
+    "Doorway" = Location{},
     "Table" = Location{},
     "Counter" = Location{},
   },
@@ -636,7 +981,8 @@ world := NS{
           {
             name = "Remember",
             caption = "This is your home: the floor,\n" +
-                      "the ball, the child's eyes on you.",
+                      "the ball, the child's eyes on you.\n\n"+
+                      "You are tired...",
             on_use = `
               action_mem[.ChildsRoom_Desk_Window_hello].used = false
               reset_dream(.Dream1_Door)
@@ -657,7 +1003,7 @@ world := NS{
       shared.mem.lights[1].color = 0.75*{ 1, 1, 1 }
       shared.mem.lights[1].spread = 0.5
       shared.mem.lights[1].brightness = 0.9
-      shared.mem.lights[2].dir = { 0.981, 0.196, 0 }
+      shared.mem.lights[2].dir = { -1, 3, -5 }
       shared.mem.lights[2].color = 0
       shared.mem.lights[2].spread = 0.5
       shared.mem.lights[2].brightness = 0.5
@@ -668,8 +1014,8 @@ world := NS{
         disabled = false,
         centered = true,
         memory = true,
-        yaw = 0,
-        pitch = 2,
+        yaw = -9,
+        pitch = 3,
         distance = .D3,
         rotation = .Center,
         sense_required = 0,
@@ -695,9 +1041,9 @@ world := NS{
         disabled = false,
         centered = true,
         memory = true,
-        yaw = 6,
-        pitch = 2,
-        distance = .D3,
+        yaw = -1,
+        pitch = 1,
+        distance = .D9,
         rotation = .Center,
         sense_required = 0,
         sense_contour = "",
@@ -720,9 +1066,9 @@ world := NS{
         disabled = false,
         centered = true,
         memory = true,
-        yaw = 13,
-        pitch = 2,
-        distance = .D3,
+        yaw = 7,
+        pitch = 3,
+        distance = .D1,
         rotation = .Center,
         sense_required = 0,
         sense_contour = "",
@@ -750,9 +1096,9 @@ world := NS{
         disabled = false,
         centered = true,
         memory = true,
-        yaw = 19,
-        pitch = 2,
-        distance = .D3,
+        yaw = 15,
+        pitch = 1,
+        distance = .D9,
         rotation = .Center,
         sense_required = 0,
         sense_contour = "",
@@ -779,8 +1125,8 @@ world := NS{
         disabled = false,
         centered = true,
         memory = false, // exit memory
-        yaw = 26,
-        pitch = 2,
+        yaw = -9,
+        pitch = 0,
         distance = .D3,
         rotation = .Center,
         sense_required = 4,
@@ -794,12 +1140,13 @@ world := NS{
           {
             name = "Remember",
             caption = "Without vision: sound is your guide.\n"+
-                      "Ears are now your eyes.",
+                      "Ears are now your eyes.\n\n"+
+                      "You are tired...",
             on_use = `
               reset_dream(.Dream2_Door)
-              load_location(.Memory3)
+              load_location(.LivingRoom_Couch)
               `,
-          }
+          },
         },
       },
     }
@@ -915,7 +1262,8 @@ world := NS{
             name = "Remember",
             caption = "White fire swallows the sky, your chest\n"+
                       "tightens, steps grow heavier.\n"+
-                      "Your body gives less with each dawn.",
+                      "Your body gives less with each dawn.\n\n"+
+                      "You are tired...",
             on_use = `
               reset_dream(.Dream3_Door)
               load_location(.ChildsRoom_Doorway)
@@ -1109,6 +1457,8 @@ world := NS{
               caption = "You are hungry.",
               on_use = `
                 load_location(.ChildsRoom_Floor)
+                action_mem[.Kitchen_CantGo].used = true
+                action_mem[.Kitchen_CanGo].used = false
                 `,
             },
           },
@@ -1222,7 +1572,7 @@ world := NS{
           actions = {
             {
               name = "Scratch",
-              caption = "I claw deep into the bark, but my marks do\n"+
+              caption = "You claw deep into the bark, but my marks do\n"+
                         "not last, the tree has already forgotten me.",
               on_use = `
                 node_mem[.Dream_Outside_Tree].disabled = true
@@ -1253,7 +1603,7 @@ world := NS{
           actions = {
             {
               name = "Listen",
-              caption = "I listen, not for others, but for the\n"+
+              caption = "You listen, not for others, but for the\n"+
                         "missing chapter of myself...",
               on_use = `
                 node_mem[.Dream_Outside_Street].disabled = true
@@ -1284,7 +1634,7 @@ world := NS{
           actions = {
             {
               name = "Call Out",
-              caption = "I raise my voice to the moon, and it\n"+
+              caption = "You raise my voice to the moon, and it\n"+
                         "answers: nothing has ever known you.",
               on_use = `
                 play_sound(.Mewowl)

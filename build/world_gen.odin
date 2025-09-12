@@ -223,11 +223,11 @@ add_string :: proc(sb : ^strings.Builder, str : string) {
       fmt.eprintf("String \"%v\" contains breaking pattern at: %v!", str, i)
       os.exit(1)
     }
-    last_can_break = (c >= 'a' && c <= 'z') || c == '.' || c == '!' || c == '\"'
+    last_can_break = (c >= 'a' && c <= 'z') || c == '.' || c == '!' || c == '\"' || c == '\''
     if c == '\n' {
       strings.write_string(sb, "\\n")
     } else if c == '"' {
-      strings.write_string(sb, "\\\"")
+      strings.write_string(sb, "\\\"\'")
     } else {
       strings.write_rune(sb, c)
     }
@@ -241,7 +241,7 @@ to_key :: proc(str : string) -> string {
   w := strings.to_writer(&b)
 
   strings.string_case_iterator(w, s, proc(w: io.Writer, prev, curr, next: rune) {
-    if !strings.is_delimiter(curr) && !strings.contains_rune(".!\"", curr) {
+    if !strings.is_delimiter(curr) && !strings.contains_rune(".!\"\'", curr) {
       if strings.is_delimiter(prev) || prev == 0 || (unicode.is_lower(prev) && unicode.is_upper(curr)) {
         if prev != 0 {
           io.write_rune(w, '_')
