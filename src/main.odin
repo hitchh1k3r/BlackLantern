@@ -249,7 +249,12 @@ draw_node :: proc "contextless" (node : ^Node) {
       action_size = node.size/3/1.1
       @(static)
       action_pos : V3
-      action_pos = node.pos + node.size/3*node.up
+      action_pos = node.pos
+      if node.center {
+        action_pos -= node.size/2.5*node.up
+      } else {
+        action_pos += node.size/3*node.up
+      }
       NAMES := [SenseId]string{
         .Contour = "Contour",
         .Smell = "Smell",

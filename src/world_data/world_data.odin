@@ -616,8 +616,8 @@ world := NS{
           disabled = true,
           centered = true,
           memory = false,
-          yaw = 0,
-          pitch = 3,
+          yaw = -1,
+          pitch = 1,
           distance = .D27,
           rotation = .Center,
           sense_required = 0,
@@ -635,7 +635,7 @@ world := NS{
           centered = true,
           memory = false,
           yaw = 11,
-          pitch = 3,
+          pitch = 1,
           distance = .D27,
           rotation = .Center,
           sense_required = 0,
@@ -653,7 +653,7 @@ world := NS{
           centered = true,
           memory = false,
           yaw = -11,
-          pitch = 3,
+          pitch = 1,
           distance = .D27,
           rotation = .Center,
           sense_required = 0,
@@ -732,7 +732,7 @@ world := NS{
           disabled = false,
           centered = false,
           memory = false,
-          yaw = 16,
+          yaw = 18,
           pitch = 4,
           distance = .D27,
           rotation = .Center,
@@ -764,8 +764,8 @@ world := NS{
           disabled = true,
           centered = true,
           memory = true,
-          yaw = 0,
-          pitch = -1,
+          yaw = -1,
+          pitch = -2,
           distance = .D1,
           rotation = .Center,
           sense_required = 2,
@@ -780,7 +780,9 @@ world := NS{
               name = "Stir",
               caption = "A single act of care ripples outward,\n"+
                         "until Insignificance drowns in its waves.",
-              on_use = ``,
+              on_use = `
+                node_mem[.Dream3_Outside_Insignificance].disabled = true
+                `,
             }
           },
         },
@@ -790,7 +792,7 @@ world := NS{
           centered = true,
           memory = true,
           yaw = -11,
-          pitch = -1,
+          pitch = -2,
           distance = .D1,
           rotation = .Center,
           sense_required = 2,
@@ -805,7 +807,9 @@ world := NS{
               name = "Project",
               caption = "Erasure burns away in the projected light,\n"+
                         "each copy reigniting the lamp.",
-              on_use = ``,
+              on_use = `
+                node_mem[.Dream3_Outside_Erasure].disabled = true
+                `,
             }
           },
         },
@@ -815,7 +819,7 @@ world := NS{
           centered = true,
           memory = true,
           yaw = 11,
-          pitch = -1,
+          pitch = -2,
           distance = .D1,
           rotation = .Center,
           sense_required = 2,
@@ -831,7 +835,9 @@ world := NS{
               caption = "With no start nor end, a circle defies\n"+
                         "Unfinishedness; the cycle of play\n"+
                         "completes itself.",
-              on_use = ``,
+              on_use = `
+                node_mem[.Dream3_Outside_Unfinishedness].disabled = true
+                `,
             }
           },
         },

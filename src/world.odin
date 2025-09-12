@@ -86,14 +86,12 @@ init_world :: proc "contextless" () {
     node.sense_left_until_revealed = serial.sense_left_until_revealed
     yaw := -f32(serial.yaw_pos) * 11.25 * RAD_PER_DEG
     transform := mat4_yaw_pitch(yaw, 0)
-    dist := f32(serial.distance)
-    dist *= dist
-    node.pos = (transform * V4{ 0, dist*(f32(serial.pitch_pos)-3)/2, -pow(3, f32(serial.distance)), 1 }).xyz
+    dist := pow(f32(serial.distance+1), 2) / 15
+    node.pos = (transform * V4{ 0, dist*dist*5*(f32(serial.pitch_pos)-3), -pow(3, f32(serial.distance)), 1 }).xyz
     transform *= mat4_yaw_pitch((f32(serial.rotation)-1) * 35 * RAD_PER_DEG, 0)
     node.right = (transform * V4{ 1, 0, 0, 0 }).xyz
     node.up = { 0, 1, 0 }
-    // node.size = 0.6 * dist
-    node.size = 0.6
+    node.size = 2 * dist
     node.actions = (transmute([^]Action)(&action_mem))[action_idx:action_idx+int(serial.action_count)]
 
     if serial.sense_contour {
@@ -130,6 +128,9 @@ init_world :: proc "contextless" () {
       action_idx += 1
     }
   }
+  node_mem[.Dream3_Outside_Insignificance].size = 20
+  node_mem[.Dream3_Outside_Unfinishedness].size = 20
+  node_mem[.Dream3_Outside_Erasure].size = 20
 }
 
 get_string :: proc "contextless" () -> (result : string) {
