@@ -118,7 +118,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     {{#shared_mems}}
       let shared_mem_{{name}};
     {{/shared_mems}}
-    const {instance: {exports}} = await WebAssembly.instantiateStreaming(fetch('g.wasm'), {
+    const response = await fetch('g.wasm');
+    const bytes = await response.arrayBuffer();
+    const {instance: {exports}} = await WebAssembly.instantiate(bytes, {
       /** @export */
       J: {
         /** @export */
