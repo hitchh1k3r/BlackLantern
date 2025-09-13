@@ -23,7 +23,9 @@ foreign js {
   @(link_name="d")
   draw_vert_buffer :: proc(shader : Shader, vert_count : i32) ---
   @(link_name="e")
-  _play_sound_effect :: proc(layers, length : i32, volume : f32) ---
+  _play_sound_effect :: proc(layers, length : i32, volume : f32, pitch : f32) ---
+  @(link_name="f")
+  random :: proc(max : i32) -> i32 ---
 }
 
 Color :: distinct [4]f32
@@ -59,6 +61,7 @@ hovering : ^Node
 hover_action := -100
 delta_time : f32
 
+// code[3]?
 @(export, link_name="y")
 update :: proc "contextless" () {
   @(static)
@@ -83,9 +86,12 @@ update :: proc "contextless" () {
     if &node == hovering {
       target_reveal = 2
       for &action, sense in node.senses {
-        if update_action(&action.used, &action.use_progress, -int(sense)-1) && node.sense_left_until_revealed > 0 {
-          action_cooldown = 0.5
-          node.sense_left_until_revealed -= 1
+        if update_action(&action.used, &action.use_progress, -int(sense)-1) {
+          play_sound(.Sense)
+          if node.sense_left_until_revealed > 0 {
+            action_cooldown = 0.5
+            node.sense_left_until_revealed -= 1
+          }
         }
       }
       if node.sense_left_until_revealed == 0 {
@@ -93,6 +99,10 @@ update :: proc "contextless" () {
           if update_action(&action.used, &action.use_progress, action_idx) {
             action_cooldown = 2
             if hovering.memory_fragment {
+              notes := [?]f32{
+                0.7491759065028468, 0.8909199880131855, 1.0, 1.1224902607132154, 1.3348816302067725,
+              }
+              play_sound(.Piano, 0.1, notes[random(len(notes))])
               hovering.name = action.caption
               hovering.size *= 0.5
               for &reveal in nodes[node_idx:] {
@@ -105,6 +115,7 @@ update :: proc "contextless" () {
                 }
               }
             } else {
+              play_sound(.Action)
               if action.caption != "" {
                 caption(action.caption)
               }
@@ -118,7 +129,7 @@ update :: proc "contextless" () {
         if action_idx == hover_action && action_cooldown <= 0 {
           use_progress^ += action_speed*delta_time
           if !used^ {
-            target_progress = min(1.01, use_progress^);
+            target_progress = min(1.01, use_progress^)
             if use_progress^ > 1.1 {
               used^ = true
               return true
@@ -174,12 +185,17 @@ render :: proc "contextless" (calculate_view : bool, calculate_proj : bool) {
   draw_vert_buffer(.Skybox, 3)
 
   reticle_size := 0.5*max(0.1, 1 - (1-shared.mem.reticle_progress) * (1-shared.mem.reticle_progress))
-  shared.mem.vert_buffer[0] = { (inv_view * V4{ -reticle_size, -reticle_size, -2, 1 }).xyz, { -1, -1 }, { 1, 1, 1, 1 } }
-  shared.mem.vert_buffer[1] = { (inv_view * V4{  reticle_size, -reticle_size, -2, 1 }).xyz, {  1, -1 }, { 1, 1, 1, 1 } }
-  shared.mem.vert_buffer[2] = { (inv_view * V4{ -reticle_size,  reticle_size, -2, 1 }).xyz, { -1,  1 }, { 1, 1, 1, 1 } }
-  shared.mem.vert_buffer[3] = { (inv_view * V4{  reticle_size, -reticle_size, -2, 1 }).xyz, {  1, -1 }, { 1, 1, 1, 1 } }
-  shared.mem.vert_buffer[4] = { (inv_view * V4{  reticle_size,  reticle_size, -2, 1 }).xyz, {  1,  1 }, { 1, 1, 1, 1 } }
-  shared.mem.vert_buffer[5] = { (inv_view * V4{ -reticle_size,  reticle_size, -2, 1 }).xyz, { -1,  1 }, { 1, 1, 1, 1 } }
+  reticle_depth := f32(2)
+  if last_hover != nil {
+    reticle_depth = -(shared.mem.view_matrix * v4(last_hover.pos, 1)).z
+    reticle_size *= reticle_depth
+  }
+  shared.mem.vert_buffer[0] = { (inv_view * V4{ -reticle_size, -reticle_size, -reticle_depth, 1 }).xyz, { -1, -1 }, { 1, 1, 1, 1 } }
+  shared.mem.vert_buffer[1] = { (inv_view * V4{  reticle_size, -reticle_size, -reticle_depth, 1 }).xyz, {  1, -1 }, { 1, 1, 1, 1 } }
+  shared.mem.vert_buffer[2] = { (inv_view * V4{ -reticle_size,  reticle_size, -reticle_depth, 1 }).xyz, { -1,  1 }, { 1, 1, 1, 1 } }
+  shared.mem.vert_buffer[3] = { (inv_view * V4{  reticle_size, -reticle_size, -reticle_depth, 1 }).xyz, {  1, -1 }, { 1, 1, 1, 1 } }
+  shared.mem.vert_buffer[4] = { (inv_view * V4{  reticle_size,  reticle_size, -reticle_depth, 1 }).xyz, {  1,  1 }, { 1, 1, 1, 1 } }
+  shared.mem.vert_buffer[5] = { (inv_view * V4{ -reticle_size,  reticle_size, -reticle_depth, 1 }).xyz, { -1,  1 }, { 1, 1, 1, 1 } }
   draw_vert_buffer(.Reticle, 6)
 
   for &node in nodes {
@@ -192,34 +208,34 @@ render :: proc "contextless" (calculate_view : bool, calculate_proj : bool) {
 }
 
 ray_quad_distance :: proc "contextless" (ray_origin: V3, ray_dir: V3, quad_origin: V3, quad_up: V3, quad_right: V3) -> f32 {
-    normal := cross(quad_right, quad_up)
-    normal = norm(normal)
+  normal := cross(quad_right, quad_up)
+  normal = norm(normal)
 
-    denom := dot(ray_dir, normal)
+  denom := dot(ray_dir, normal)
 
-    if abs(denom) < 1e-6 {
-        to_quad := quad_origin - ray_origin
-        return abs(dot(to_quad, normal))
-    }
+  if abs(denom) < 1e-6 {
+      to_quad := quad_origin - ray_origin
+      return abs(dot(to_quad, normal))
+  }
 
-    to_quad := quad_origin - ray_origin
-    t := dot(to_quad, normal) / denom
+  to_quad := quad_origin - ray_origin
+  t := dot(to_quad, normal) / denom
 
-    if t < 0 {
-        return ray_point_distance(ray_origin, ray_dir, quad_origin)
-    }
-    plane_point := ray_origin + t * ray_dir
+  if t < 0 {
+      return ray_point_distance(ray_origin, ray_dir, quad_origin)
+  }
+  plane_point := ray_origin + t * ray_dir
 
-    to_plane := plane_point - quad_origin
-    u := dot(to_plane, quad_right) / sq_mag(quad_right)
-    v := dot(to_plane, quad_up) / sq_mag(quad_up)
+  to_plane := plane_point - quad_origin
+  u := dot(to_plane, quad_right) / sq_mag(quad_right)
+  v := dot(to_plane, quad_up) / sq_mag(quad_up)
 
-    u_clamped := clamp(u, 0, 1)
-    v_clamped := clamp(v, 0, 1)
+  u_clamped := clamp(u, 0, 1)
+  v_clamped := clamp(v, 0, 1)
 
-    closest_on_quad := quad_origin + u_clamped * quad_right + v_clamped * quad_up
+  closest_on_quad := quad_origin + u_clamped * quad_right + v_clamped * quad_up
 
-    return ray_point_distance(ray_origin, ray_dir, closest_on_quad)
+  return ray_point_distance(ray_origin, ray_dir, closest_on_quad)
 }
 
 ray_point_distance :: proc "contextless" (ray_origin : V3, ray_dir : V3, point : V3) -> f32 {
@@ -357,27 +373,27 @@ draw_text :: proc "contextless" (str : string, pos : V3, right : V3, up : V3, si
       u_max := u_min + u_width
       shared.mem.vert_buffer[vert_count].pos = pos
       shared.mem.vert_buffer[vert_count].uv = { u_min, (f32(c/16)+1)/16 }
-      shared.mem.vert_buffer[vert_count].color = transmute([4]f32)(color)
+      shared.mem.vert_buffer[vert_count].color = ([4]f32)(color)
       vert_count += 1
       shared.mem.vert_buffer[vert_count].pos = pos + right
       shared.mem.vert_buffer[vert_count].uv = { u_max, (f32(c/16)+1)/16 }
-      shared.mem.vert_buffer[vert_count].color = transmute([4]f32)(color)
+      shared.mem.vert_buffer[vert_count].color = ([4]f32)(color)
       vert_count += 1
       shared.mem.vert_buffer[vert_count].pos = pos + up
       shared.mem.vert_buffer[vert_count].uv = { u_min, (f32(c/16)+0)/16 }
-      shared.mem.vert_buffer[vert_count].color = transmute([4]f32)(color)
+      shared.mem.vert_buffer[vert_count].color = ([4]f32)(color)
       vert_count += 1
       shared.mem.vert_buffer[vert_count].pos = pos + right
       shared.mem.vert_buffer[vert_count].uv = { u_max, (f32(c/16)+1)/16 }
-      shared.mem.vert_buffer[vert_count].color = transmute([4]f32)(color)
+      shared.mem.vert_buffer[vert_count].color = ([4]f32)(color)
       vert_count += 1
       shared.mem.vert_buffer[vert_count].pos = pos + right + up
       shared.mem.vert_buffer[vert_count].uv = { u_max, (f32(c/16)+0)/16 }
-      shared.mem.vert_buffer[vert_count].color = transmute([4]f32)(color)
+      shared.mem.vert_buffer[vert_count].color = ([4]f32)(color)
       vert_count += 1
       shared.mem.vert_buffer[vert_count].pos = pos + up
       shared.mem.vert_buffer[vert_count].uv = { u_min, (f32(c/16)+0)/16 }
-      shared.mem.vert_buffer[vert_count].color = transmute([4]f32)(color)
+      shared.mem.vert_buffer[vert_count].color = ([4]f32)(color)
       vert_count += 1
       pos += right
     }
@@ -388,7 +404,7 @@ draw_text :: proc "contextless" (str : string, pos : V3, right : V3, up : V3, si
   return
 }
 
-caption :: #force_inline proc "contextless" (text : string, time := f32(10)) {
+caption :: proc "contextless" (text : string, time := f32(10)) {
   caption_text = text
   caption_ttl = time
 }

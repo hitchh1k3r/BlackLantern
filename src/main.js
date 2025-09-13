@@ -119,20 +119,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       let shared_mem_{{name}};
     {{/shared_mems}}
     const {instance: {exports}} = await WebAssembly.instantiateStreaming(fetch('g.wasm'), {
-      // NOCOMMIT remove env, do custom math procs
-      /** @export */
-      env: {
-        /** @export */
-        sinf: Math.sin,
-        /** @export */
-        cosf: Math.cos,
-        /** @export */
-        tanf: Math.tan,
-        /** @export */
-        powf: Math.pow,
-        /** @export */
-        exp2f: (v) => { return Math.pow(2, v); },
-      },
       /** @export */
       J: {
         /** @export */
@@ -217,18 +203,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           gl.bufferSubData(gl.ARRAY_BUFFER, 0, view);
           gl.drawArrays(gl.TRIANGLES, 0, vert_count);
         },
-        e /* play_sound_effect */: (layers, length, volume) => {
-          function create_oscillator(times, freqs, gains, volume) {
+        e /* play_sound_effect */: (layers, length, volume, pitch) => {
+          function create_oscillator(times, freqs, gains, volume, pitch) {
             const audio_now = audio.currentTime;
             /** @suppress {checkTypes} */
             const freq = new OscillatorNode(audio);
             /** @suppress {checkTypes} */
+            const volume_node = new GainNode(audio, { gain: volume });
             const gain = new GainNode(audio);
             for (let i = 0; i < times.length; i += 1) {
-              gain.gain.linearRampToValueAtTime(volume*gains[i], audio_now+times[i]);
-              freq.frequency.linearRampToValueAtTime(freqs[i], audio_now+times[i]);
+              gain.gain.linearRampToValueAtTime(gains[i], audio_now+times[i]);
+              freq.frequency.linearRampToValueAtTime(pitch*freqs[i], audio_now+times[i]);
             }
-            freq.connect(gain).connect(audio_volume);
+            freq.connect(gain).connect(volume_node).connect(audio_volume);
             freq.start();
             setTimeout(() => {
               freq.stop();
@@ -244,8 +231,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             const gains = shared_mem_audio_buffer.subarray(gain_idx, gain_idx+length);
             freq_idx += length;
             gain_idx += length;
-            create_oscillator(times, freqs, gains, volume);
+            create_oscillator(times, freqs, gains, volume, pitch);
           }
+        },
+        f /* random */: (max) => {
+          return Math.floor(Math.random() * max);
         },
       }
     });

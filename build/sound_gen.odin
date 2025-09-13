@@ -7,7 +7,7 @@ import "core:os"
 import "core:image/png"
 
 FREQ_POWER :: 10.0
-FREQ_MIN :: 400
+FREQ_MIN :: 260
 FREQ_MAX :: 5200
 
 write_sound_file :: proc() {
@@ -29,6 +29,9 @@ SoundId :: enum {
   Mew,
   Mewowl,
   Siren,
+  Piano,
+  Sense,
+  Action,
 }
 
 Sound :: struct {
@@ -43,11 +46,27 @@ SOUNDS := [SoundId]Sound {
   gen_sound(&file_out, "Mew",    "res/sounds/mew.png",    5020,  0.76, -47, -17)
   gen_sound(&file_out, "Mewowl", "res/sounds/mewowl.png", 4000,  0.95, -60, -10)
   gen_sound(&file_out, "Siren",  "res/sounds/siren.png",  2500, 10.40, -63, -22)
+  gen_sound(&file_out, "Piano",  "res/sounds/piano.png",  1860, 1.5, -36, -19)
+  fmt.sbprint(&file_out, ""+
+`
+  .Sense = {
+    length =      0.05,
+    times =       {   0, 128, 255 },
+    frequencies = { 208, 184,   0, },
+    amplitudes =  {  20,  20,   0, },
+  },
+  .Action = {
+    length =      0.05,
+    times =       {   0, 128, 255 },
+    frequencies = {   0, 184, 208, },
+    amplitudes =  {  20,  20,   0, },
+  },
+`)
 
   fmt.sbprint(&file_out, ""+
 `}
 
-play_sound :: proc "contextless" (sound : SoundId, volume := f32(1)) {
+play_sound :: proc "contextless" (sound : SoundId, volume := f32(1), pitch := f32(1)) {
   sound := SOUNDS[sound]
 
   sample_count := len(sound.times)
@@ -71,7 +90,7 @@ play_sound :: proc "contextless" (sound : SoundId, volume := f32(1)) {
     shared.mem.audio_buffer[write_idx + sample_count*layer_count] = f32(sound.amplitudes[i]) / 255
     write_idx += 1
   }
-  _play_sound_effect(i32(layer_count), i32(sample_count), volume)
+  _play_sound_effect(i32(layer_count), i32(sample_count), volume, pitch)
 }
 `)
 

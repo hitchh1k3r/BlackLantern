@@ -26,7 +26,6 @@ Text :: struct {
   yaw : int, // 0 = north, 8 = west
   pitch : int, // 0 = flat, -3 = -30 degrees,  [-3..4]
   distance : enum { D1, D3, D9, D27 }, // most things are 3 units away (D3)
-  rotation : enum { Left, Center, Right }, // faces the origin, and optionally turned 35 degrees to a side
   sense_required : int,
   sense_contour : string,
   sense_smell : string,
@@ -61,7 +60,6 @@ world := NS{
           yaw = 1,
           pitch = -1,
           distance = .D1,
-          rotation = .Center,
           sense_required = 3,
           sense_contour = "",
           sense_smell = "self",
@@ -86,7 +84,7 @@ world := NS{
               name = "Sleep",
               caption = "",
               on_use = `
-                load_location(.Dream_House)
+                new_location = .Dream_House
                 `,
             },
           },
@@ -99,7 +97,6 @@ world := NS{
           yaw = -9,
           pitch = -3,
           distance = .D1,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "crumpled",
           sense_smell = "dirt, sweat",
@@ -118,7 +115,6 @@ world := NS{
           yaw = 7,
           pitch = -3,
           distance = .D1,
-          rotation = .Center,
           sense_required = 1,
           sense_contour = "narrow, deep",
           sense_smell = "",
@@ -142,7 +138,6 @@ world := NS{
           yaw = 13,
           pitch = 1,
           distance = .D3,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "tall, wide",
           sense_smell = "",
@@ -155,7 +150,7 @@ world := NS{
               name = "Goto",
               caption = "",
               on_use = `
-                load_location(.ChildsRoom_Desk)
+                new_location = .ChildsRoom_Desk
                 this_action.used = false
                 `,
             },
@@ -169,7 +164,6 @@ world := NS{
           yaw = -12,
           pitch = 1,
           distance = .D9,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -182,7 +176,7 @@ world := NS{
               name = "Goto",
               caption = "",
               on_use = `
-                load_location(.ChildsRoom_Doorway)
+                new_location = .ChildsRoom_Doorway
                 this_action.used = false
                 `,
             },
@@ -206,7 +200,6 @@ world := NS{
           yaw = -8,
           pitch = -3,
           distance = .D3,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -219,7 +212,7 @@ world := NS{
               name = "Goto",
               caption = "",
               on_use = `
-                load_location(.ChildsRoom_Floor)
+                new_location = .ChildsRoom_Floor
                 this_action.used = false
                 `,
             },
@@ -233,7 +226,6 @@ world := NS{
           yaw = 8,
           pitch = 2,
           distance = .D1,
-          rotation = .Center,
           sense_required = 3,
           sense_contour = "flat",
           sense_smell = "",
@@ -259,12 +251,11 @@ world := NS{
           yaw = 16,
           pitch = 2,
           distance = .D3,
-          rotation = .Center,
-          sense_required = 4,
+          sense_required = 3,
           sense_contour = "tall",
           sense_smell = "waxy",
           sense_feel = "",
-          sense_listen = "rattling",
+          sense_listen = "rattle",
           sense_taste = "",
           sense_poke = "hollow",
           actions = {
@@ -287,7 +278,6 @@ world := NS{
           yaw = 16,
           pitch = -3,
           distance = .D9,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -300,7 +290,7 @@ world := NS{
               name = "Jump",
               caption = "You hop over to where the pens spilled.",
               on_use = `
-                load_location(.ChildsRoom_Doorway)
+                new_location = .ChildsRoom_Doorway
                 this_action.used = false
                 `,
             },
@@ -314,7 +304,6 @@ world := NS{
           yaw = 0,
           pitch = 0,
           distance = .D1,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "thin, flat",
           sense_smell = "",
@@ -333,7 +322,6 @@ world := NS{
           yaw = 14,
           pitch = 1,
           distance = .D3,
-          rotation = .Center,
           sense_required = 4,
           sense_contour = "round",
           sense_smell = "stale",
@@ -373,7 +361,6 @@ world := NS{
           yaw = 0,
           pitch = 0,
           distance = .D3,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -386,7 +373,7 @@ world := NS{
               name = "Goto",
               caption = "",
               on_use = `
-                load_location(.ChildsRoom_Floor)
+                new_location = .ChildsRoom_Floor
                 this_action.used = false
                 `,
             },
@@ -400,7 +387,6 @@ world := NS{
           yaw = 4,
           pitch = 2,
           distance = .D3,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -413,7 +399,7 @@ world := NS{
               name = "Goto",
               caption = "",
               on_use = `
-                load_location(.ChildsRoom_Desk)
+                new_location = .ChildsRoom_Desk
                 this_action.used = false
                 `,
             },
@@ -427,7 +413,6 @@ world := NS{
           yaw = -10,
           pitch = 4,
           distance = .D3,
-          rotation = .Center,
           sense_required = 3,
           sense_contour = "tall",
           sense_smell = "",
@@ -447,7 +432,7 @@ world := NS{
               name = "Leave Room",
               caption = "You slip between the door and the wall.",
               on_use = `
-                load_location(.LivingRoom_Doorway)
+                new_location = .LivingRoom_Doorway
                 this_action.used = false
                 `,
             }
@@ -461,7 +446,6 @@ world := NS{
           yaw = -14,
           pitch = -1,
           distance = .D3,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "",
           sense_smell = "strong, sweat",
@@ -480,7 +464,6 @@ world := NS{
           yaw = 10,
           pitch = 1,
           distance = .D1,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "square",
           sense_smell = "dusty",
@@ -499,7 +482,6 @@ world := NS{
           yaw = 13,
           pitch = 1,
           distance = .D1,
-          rotation = .Center,
           sense_required = 4,
           sense_contour = "sphere",
           sense_smell = "",
@@ -512,7 +494,7 @@ world := NS{
               name = "Remember",
               caption = "A memory unfurls around you...",
               on_use = `
-                load_location(.Memory1)
+                new_location = .Memory1
                 `,
             },
           },
@@ -541,7 +523,6 @@ world := NS{
           yaw = 6,
           pitch = 2,
           distance = .D9,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -554,7 +535,7 @@ world := NS{
               name = "Goto Child's Room",
               caption = "",
               on_use = `
-                load_location(.ChildsRoom_Doorway)
+                new_location = .ChildsRoom_Doorway
                 this_action.used = false
                 `,
             },
@@ -568,7 +549,6 @@ world := NS{
           yaw = -2,
           pitch = 2,
           distance = .D3,
-          rotation = .Center,
           sense_required = 3,
           sense_contour = "doorway",
           sense_smell = "food",
@@ -588,7 +568,7 @@ world := NS{
               name = "Enter",
               caption = "",
               on_use = `
-                load_location(.Kitchen_Doorway)
+                new_location = .Kitchen_Doorway
                 this_action.used = false
                 `,
             },
@@ -602,11 +582,10 @@ world := NS{
           yaw = -14,
           pitch = -2,
           distance = .D1,
-          rotation = .Center,
           sense_required = 3,
           sense_contour = "",
           sense_smell = "feet",
-          sense_feel = "coarse, fuzz",
+          sense_feel = "coarse",
           sense_listen = "",
           sense_taste = "fuzz",
           sense_poke = "",
@@ -620,7 +599,7 @@ world := NS{
               name = "Goto",
               caption = "",
               on_use = `
-                load_location(.LivingRoom_Rug)
+                new_location = .LivingRoom_Rug
                 this_action.used = false
                 `,
             },
@@ -648,7 +627,6 @@ world := NS{
           yaw = 2,
           pitch = 1,
           distance = .D3,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -661,7 +639,7 @@ world := NS{
               name = "Goto",
               caption = "",
               on_use = `
-                load_location(.LivingRoom_Doorway)
+                new_location = .LivingRoom_Doorway
                 this_action.used = false
                 `,
             },
@@ -675,7 +653,6 @@ world := NS{
           yaw = 10,
           pitch = 2,
           distance = .D3,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "wide, tall",
           sense_smell = "sun cooked",
@@ -688,7 +665,7 @@ world := NS{
               name = "Climb",
               caption = "",
               on_use = `
-                load_location(.LivingRoom_Couch)
+                new_location = .LivingRoom_Couch
                 this_action.used = false
                 `,
             },
@@ -702,7 +679,6 @@ world := NS{
           yaw = -12,
           pitch = 0,
           distance = .D1,
-          rotation = .Center,
           sense_required = 5,
           sense_contour = "shallow, round",
           sense_smell = "clean",
@@ -726,7 +702,6 @@ world := NS{
           yaw = -8,
           pitch = 0,
           distance = .D1,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "shallow, round",
           sense_smell = "faint food",
@@ -759,7 +734,6 @@ world := NS{
           yaw = -6,
           pitch = -3,
           distance = .D3,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -772,7 +746,7 @@ world := NS{
               name = "Goto",
               caption = "",
               on_use = `
-                load_location(.LivingRoom_Rug)
+                new_location = .LivingRoom_Rug
                 this_action.used = false
                 `,
             },
@@ -786,7 +760,6 @@ world := NS{
           yaw = 14,
           pitch = 2,
           distance = .D1,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "flat, cloth",
           sense_smell = "yarn",
@@ -810,7 +783,6 @@ world := NS{
           yaw = -12,
           pitch = -3,
           distance = .D1,
-          rotation = .Center,
           sense_required = 3,
           sense_contour = "flat",
           sense_smell = "",
@@ -829,7 +801,6 @@ world := NS{
           yaw = -12,
           pitch = 2,
           distance = .D3,
-          rotation = .Right,
           sense_required = 3,
           sense_contour = "mechanism",
           sense_smell = "burnt dust",
@@ -848,7 +819,6 @@ world := NS{
           yaw = -9,
           pitch = 1,
           distance = .D3,
-          rotation = .Center,
           sense_required = 3,
           sense_contour = "square",
           sense_smell = "plastic, cardboard",
@@ -861,7 +831,7 @@ world := NS{
               name = "Remember",
               caption = "This was the fathers...",
               on_use = `
-                load_location(.Memory2)
+                new_location = .Memory2
                 `,
             },
           },
@@ -870,9 +840,85 @@ world := NS{
     },
   },
   "Kitchen" = NS{
-    "Doorway" = Location{},
-    "Table" = Location{},
-    "Counter" = Location{},
+    "Doorway" = Location{
+      setup = `
+        shared.mem.lights[0].dir = { 1, 2, 5 }
+        shared.mem.lights[0].color = 0.4*{ 1, 1, 0.95 }
+        shared.mem.lights[0].spread = 0.5
+        shared.mem.lights[0].brightness = 0.5
+      `,
+      texts = {
+        {
+          name = "Living Room",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = 14,
+          pitch = 2,
+          distance = .D3,
+          sense_required = 0,
+          sense_contour = "",
+          sense_smell = "",
+          sense_feel = "",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "",
+          actions = {
+            {
+              name = "Enter",
+              caption = "",
+              on_use = `
+                new_location = .LivingRoom_Doorway
+                this_action.used = false
+                `,
+            },
+          },
+        },
+        {
+          name = "Smoke",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = -2,
+          pitch = 3,
+          distance = .D3,
+          sense_required = 1,
+          sense_contour = "",
+          sense_smell = "acrid",
+          sense_feel = "",
+          sense_listen = "",
+          sense_taste = "",
+          sense_poke = "",
+          actions = {
+          },
+        },
+        {
+          name = "Wooden Spoon",
+          disabled = false,
+          centered = false,
+          memory = false,
+          yaw = 1,
+          pitch = -2,
+          distance = .D1,
+          sense_required = 3,
+          sense_contour = "long",
+          sense_smell = "",
+          sense_feel = "wood",
+          sense_listen = "",
+          sense_taste = "food",
+          sense_poke = "",
+          actions = {
+            {
+              name = "Remember",
+              caption = "Another memory awaits...",
+              on_use = `
+                new_location = .Memory3
+                `,
+            },
+          },
+        },
+      }
+    },
   },
   "Memory1" = Location{
     setup = `
@@ -894,7 +940,6 @@ world := NS{
         yaw = -11,
         pitch = 2,
         distance = .D3,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -919,7 +964,6 @@ world := NS{
         yaw = -3,
         pitch = 3,
         distance = .D9,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -944,7 +988,6 @@ world := NS{
         yaw = 5,
         pitch = 0,
         distance = .D3,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -969,7 +1012,6 @@ world := NS{
         yaw = 13,
         pitch = 1,
         distance = .D1,
-        rotation = .Center,
         sense_required = 3,
         sense_contour = "",
         sense_smell = "",
@@ -984,9 +1026,10 @@ world := NS{
                       "the ball, the child's eyes on you.\n\n"+
                       "You are tired...",
             on_use = `
+              play_sound(.Mew)
               action_mem[.ChildsRoom_Desk_Window_hello].used = false
               reset_dream(.Dream1_Door)
-              load_location(.ChildsRoom_Doorway)
+              new_location = .ChildsRoom_Doorway
               `,
           }
         },
@@ -1017,7 +1060,6 @@ world := NS{
         yaw = -9,
         pitch = 3,
         distance = .D3,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -1044,7 +1086,6 @@ world := NS{
         yaw = -1,
         pitch = 1,
         distance = .D9,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -1069,7 +1110,6 @@ world := NS{
         yaw = 7,
         pitch = 3,
         distance = .D1,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -1099,7 +1139,6 @@ world := NS{
         yaw = 15,
         pitch = 1,
         distance = .D9,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -1128,7 +1167,6 @@ world := NS{
         yaw = -9,
         pitch = 0,
         distance = .D3,
-        rotation = .Center,
         sense_required = 4,
         sense_contour = "",
         sense_smell = "",
@@ -1143,8 +1181,9 @@ world := NS{
                       "Ears are now your eyes.\n\n"+
                       "You are tired...",
             on_use = `
+              play_sound(.Mewowl)
               reset_dream(.Dream2_Door)
-              load_location(.LivingRoom_Couch)
+              new_location = .LivingRoom_Couch
               `,
           },
         },
@@ -1168,10 +1207,9 @@ world := NS{
         disabled = false,
         centered = true,
         memory = true,
-        yaw = 0,
+        yaw = 9,
         pitch = 2,
-        distance = .D3,
-        rotation = .Center,
+        distance = .D9,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -1193,10 +1231,9 @@ world := NS{
         disabled = false,
         centered = true,
         memory = true,
-        yaw = 8,
-        pitch = 2,
+        yaw = -15,
+        pitch = -2,
         distance = .D3,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -1218,10 +1255,9 @@ world := NS{
         disabled = false,
         centered = true,
         memory = true,
-        yaw = 16,
-        pitch = 1,
-        distance = .D3,
-        rotation = .Center,
+        yaw = -7,
+        pitch = 2,
+        distance = .D9,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -1246,10 +1282,9 @@ world := NS{
         disabled = false,
         centered = true,
         memory = false, // exit memory
-        yaw = -8,
-        pitch = 1,
+        yaw = 1,
+        pitch = -2,
         distance = .D3,
-        rotation = .Center,
         sense_required = 3,
         sense_contour = "",
         sense_smell = "",
@@ -1265,8 +1300,9 @@ world := NS{
                       "Your body gives less with each dawn.\n\n"+
                       "You are tired...",
             on_use = `
+              action_speed = 0.8
               reset_dream(.Dream3_Door)
-              load_location(.ChildsRoom_Doorway)
+              new_location = .Kitchen_Doorway
               `,
           }
         },
@@ -1290,7 +1326,6 @@ world := NS{
           yaw = -7,
           pitch = 2,
           distance = .D3,
-          rotation = .Left,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1317,7 +1352,6 @@ world := NS{
           yaw = -6,
           pitch = 1,
           distance = .D3,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1343,7 +1377,6 @@ world := NS{
           yaw = 1,
           pitch = 3,
           distance = .D9,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1367,7 +1400,6 @@ world := NS{
           yaw = 6,
           pitch = 2,
           distance = .D3,
-          rotation = .Right,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1414,7 +1446,6 @@ world := NS{
           yaw = 6,
           pitch = 1,
           distance = .D9,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1427,7 +1458,7 @@ world := NS{
               name = "Wake Up",
               caption = "You are thirsty.",
               on_use = `
-                load_location(.ChildsRoom_Floor)
+                new_location = .ChildsRoom_Floor
                 action_mem[.HallDoor_CantGo].used = true
                 action_mem[.HallDoor_CanGo].used = false
                 `,
@@ -1443,7 +1474,6 @@ world := NS{
           yaw = 6,
           pitch = 1,
           distance = .D9,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1456,7 +1486,7 @@ world := NS{
               name = "Wake Up",
               caption = "You are hungry.",
               on_use = `
-                load_location(.ChildsRoom_Floor)
+                new_location = .ChildsRoom_Floor
                 action_mem[.Kitchen_CantGo].used = true
                 action_mem[.Kitchen_CanGo].used = false
                 `,
@@ -1471,7 +1501,6 @@ world := NS{
           yaw = 6,
           pitch = 1,
           distance = .D9,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1484,7 +1513,7 @@ world := NS{
               name = "Walk Outside",
               caption = "The dream continues...",
               on_use = `
-                load_location(.Dream_Outside)
+                new_location = .Dream_Outside
                 `,
             },
           },
@@ -1507,7 +1536,6 @@ world := NS{
           yaw = -1,
           pitch = 1,
           distance = .D27,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1525,7 +1553,6 @@ world := NS{
           yaw = 11,
           pitch = 1,
           distance = .D27,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1543,7 +1570,6 @@ world := NS{
           yaw = -11,
           pitch = 1,
           distance = .D27,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1561,7 +1587,6 @@ world := NS{
           yaw = 5,
           pitch = 2,
           distance = .D3,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1592,7 +1617,6 @@ world := NS{
           yaw = -5,
           pitch = 1,
           distance = .D9,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1623,7 +1647,6 @@ world := NS{
           yaw = 18,
           pitch = 4,
           distance = .D27,
-          rotation = .Center,
           sense_required = 0,
           sense_contour = "",
           sense_smell = "",
@@ -1655,7 +1678,6 @@ world := NS{
           yaw = -1,
           pitch = -2,
           distance = .D1,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "",
           sense_smell = "",
@@ -1668,9 +1690,7 @@ world := NS{
               name = "Stir",
               caption = "A single act of care ripples outward,\n"+
                         "until Insignificance drowns in its waves.",
-              on_use = `
-                // node_mem[.Dream_Outside_Insignificance].disabled = true
-                `,
+              on_use = ``,
             },
           },
         },
@@ -1682,7 +1702,6 @@ world := NS{
           yaw = -11,
           pitch = -2,
           distance = .D1,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "",
           sense_smell = "",
@@ -1695,9 +1714,7 @@ world := NS{
               name = "Project",
               caption = "Erasure burns away in the projected light,\n"+
                         "each copy reigniting the lamp.",
-              on_use = `
-                // node_mem[.Dream_Outside_Erasure].disabled = true
-                `,
+              on_use = ``,
             },
           },
         },
@@ -1709,7 +1726,6 @@ world := NS{
           yaw = 11,
           pitch = -2,
           distance = .D1,
-          rotation = .Center,
           sense_required = 2,
           sense_contour = "",
           sense_smell = "",
@@ -1723,9 +1739,7 @@ world := NS{
               caption = "With no start nor end, a circle defies\n"+
                         "Unfinishedness; the cycle of play\n"+
                         "completes itself.",
-              on_use = `
-                // node_mem[.Dream_Outside_Unfinishedness].disabled = true
-                `,
+              on_use = ``,
             },
           },
         },
@@ -1737,7 +1751,6 @@ world := NS{
           yaw = 16,
           pitch = -3,
           distance = .D1,
-          rotation = .Center,
           sense_required = 3,
           sense_contour = "",
           sense_smell = "",
@@ -1751,7 +1764,7 @@ world := NS{
               caption = "With your memories at hand,\n"+
                         "you drift off to sleep...",
               on_use = `
-                load_location(.Credits)
+                new_location = .Credits
                 `,
             },
           },
@@ -1770,7 +1783,6 @@ world := NS{
         yaw = 0,
         pitch = 2,
         distance = .D3,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",
@@ -1804,7 +1816,6 @@ world := NS{
         yaw = 16,
         pitch = 2,
         distance = .D3,
-        rotation = .Center,
         sense_required = 0,
         sense_contour = "",
         sense_smell = "",

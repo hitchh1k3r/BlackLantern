@@ -48,7 +48,7 @@ NodeSerial :: bit_field u32 {
   sense_left_until_revealed : u8 | 3, // 0-7
   center : bool | 1,
   distance : u8 | 2,  // 1 2 4 16
-  rotation : u8 | 2,  // -35 0 35 ??
+  _ : u8 | 2,
 
   // byte 1
   yaw_pos : u8 | 5,   // 11.25 degrees apart
@@ -85,14 +85,20 @@ init_world :: proc "contextless" () {
     node.memory_fragment = serial.memory_fragment
     node.sense_left_until_revealed = serial.sense_left_until_revealed
     yaw := -f32(serial.yaw_pos) * 11.25 * RAD_PER_DEG
-    transform := mat4_yaw_pitch(yaw, 0)
+    cy := cos(yaw)
+    sy := sin(yaw)
+    transform := Mat4{
+                   cy, 0, sy, 0,
+                    0, 1,  0, 0,
+                  -sy, 0, cy, 0,
+                    0, 0,  0, 1,
+                }
     dist := pow(f32(serial.distance+1), 2) / 15
     node.pos = (transform * V4{ 0, dist*dist*5*(f32(serial.pitch_pos)-3), -pow(3, f32(serial.distance)), 1 }).xyz
-    transform *= mat4_yaw_pitch((f32(serial.rotation)-1) * 35 * RAD_PER_DEG, 0)
     node.right = (transform * V4{ 1, 0, 0, 0 }).xyz
     node.up = { 0, 1, 0 }
     node.size = 2 * dist
-    node.actions = (transmute([^]Action)(&action_mem))[action_idx:action_idx+int(serial.action_count)]
+    node.actions = (([^]Action)(&action_mem))[action_idx:action_idx+int(serial.action_count)]
 
     if serial.sense_contour {
       node.senses[.Contour].response = get_string()

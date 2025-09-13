@@ -13,7 +13,7 @@ NodeSerial :: bit_field u32 {
   sense_left_until_revealed : u8 | 3, // 0-7
   center : bool | 1,
   distance : u8 | 2,  // 1 2 4 16
-  rotation : u8 | 2,  // -35 0 35 ??
+  _ : u8 | 2,  // -35 0 35 ??
 
   // byte 1
   yaw_pos : u8 | 5,   // 11.25 degrees apart
@@ -160,7 +160,6 @@ write_world_data_file :: proc() {
       sense_left_until_revealed = u8(text.sense_required),
       center = text.centered,
       distance = u8(text.distance),
-      rotation = u8(text.rotation),
       yaw_pos = u8(text.yaw %% 32),
       pitch_pos = u8(text.pitch + 3),
       disabled = text.disabled,
@@ -181,6 +180,7 @@ write_world_data_file :: proc() {
   fmt.sbprint(&file_out, "}\n\n")
 
   fmt.sbprint(&file_out, "action_callback :: proc \"contextless\" (idx : u8, this_node : ^Node, this_action : ^Action) {\n")
+  fmt.sbprint(&file_out, "  new_location := LocationId(-1)\n")
   fmt.sbprint(&file_out, "  switch idx {\n")
   callback_idx := 1
   for action, idx in actions {
@@ -190,7 +190,10 @@ write_world_data_file :: proc() {
       fmt.sbprint(&file_out, action.on_use)
     }
   }
-  fmt.sbprint(&file_out, "\n  }\n")
+  fmt.sbprint(&file_out, "\n  }\n\n")
+  fmt.sbprint(&file_out, "  if new_location > LocationId(-1) {\n")
+  fmt.sbprint(&file_out, "    load_location(new_location)\n")
+  fmt.sbprint(&file_out, "  }\n")
   fmt.sbprint(&file_out, "}\n\n")
   os.write_entire_file("src/world_data_.odin", file_out.buf[:])
 }
@@ -227,7 +230,9 @@ add_string :: proc(sb : ^strings.Builder, str : string) {
     if c == '\n' {
       strings.write_string(sb, "\\n")
     } else if c == '"' {
-      strings.write_string(sb, "\\\"\'")
+      strings.write_string(sb, "\\\"")
+    } else if c == '\'' {
+      strings.write_string(sb, "\\\'")
     } else {
       strings.write_rune(sb, c)
     }

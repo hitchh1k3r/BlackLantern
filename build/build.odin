@@ -77,7 +77,7 @@ main :: proc() {
     }
 
   if !is_debug { fmt.println("Compressing WASM...")
-    if exec(CMD_WASMOPT + " -Oz --enable-bulk-memory --converge --low-memory-unused --zero-filled-memory --const-hoisting --ignore-implicit-traps artifacts/full.wasm -o artifacts/g.wasm") == 0 {
+    if exec(CMD_WASMOPT + " --enable-bulk-memory -Oz --converge --low-memory-unused --zero-filled-memory --const-hoisting --ignore-implicit-traps --strip --vacuum artifacts/full.wasm -o artifacts/g.wasm") == 0 {
       fmt.printfln("  okay (%.3f -> %.3f KiB)", f32(os.file_size_from_path("artifacts/full.wasm"))/1024, f32(os.file_size_from_path("artifacts/g.wasm"))/1024)
     } else {
       return
@@ -141,7 +141,7 @@ main :: proc() {
 
   if !is_debug { fmt.println("Creating ZIP Archive...")
     os.set_current_directory("artifacts")
-    if exec(CMD_7ZIP + " a -mX9 -tzip -y archive.zip g.wasm index.html > nul") == 0 {
+    if exec(CMD_7ZIP + " a -mX9 -tzip -mpass=30 -y archive.zip g.wasm index.html > nul") == 0 {
       size := os.file_size_from_path("archive.zip")
       fmt.printfln("  okay (%.3f KiB - %.2f%%)", f32(size)/1024, f32(size)*100/13/1024)
     } else {
